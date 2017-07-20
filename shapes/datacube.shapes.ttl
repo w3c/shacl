@@ -1,0 +1,431 @@
+# baseURI: http://topbraid.org/datacube
+# imports: http://datashapes.org/dash
+# imports: http://purl.org/linked-data/cube
+# imports: http://www.w3.org/2004/02/skos/core
+
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+qb:DataSetShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Data set shape" ;
+  sh:property [
+      sh:path qb:structure ;
+      rdfs:comment "IC-2. Unique DSD" ;
+      sh:maxCount 1 ;
+      sh:message "Every qb:DataSet has exactly one associated qb:DataStructureDefinition." ;
+      sh:minCount 1 ;
+    ] ;
+  sh:targetClass qb:DataSet ;
+.
+qb:DataStructureDefinitionShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Data structure definition shape" ;
+  sh:property [
+      sh:path qb:component ;
+      rdfs:comment "IC-3. DSD includes measure" ;
+      sh:message "Every qb:DataStructureDefinition must include at least one declared measure." ;
+      sh:qualifiedMinCount 1 ;
+      sh:qualifiedValueShape [
+          sh:path qb:componentProperty ;
+          sh:qualifiedMinCount 1 ;
+          sh:qualifiedValueShape [
+              rdfs:comment "Note: we assume here that subclasses of qb:MeasureProperty are also permitted." ;
+              sh:class qb:MeasureProperty ;
+            ] ;
+        ] ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-6. Only attributes may be optional" ;
+      sh:message "The only components of a qb:DataStructureDefinition that may be marked as optional, using qb:componentRequired are attributes." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:component ?componentSpec .
+	?componentSpec qb:componentRequired false ;
+		qb:componentProperty ?component .
+	FILTER NOT EXISTS { ?component a qb:AttributeProperty }
+}""" ;
+    ] ;
+  sh:targetClass qb:DataStructureDefinition ;
+.
+qb:DimensionPropertyShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Dimension property shape" ;
+  sh:node [
+      rdfs:comment "IC-5: Concept dimensions have code lists" ;
+      sh:message "Every dimension with range skos:Concept must have a qb:codeList." ;
+      sh:or (
+          [
+            sh:not [
+                sh:path rdfs:range ;
+                sh:hasValue skos:Concept ;
+              ] ;
+          ]
+          [
+            sh:path qb:codeList ;
+            sh:minCount 1 ;
+          ]
+        ) ;
+    ] ;
+  sh:property [
+      sh:path rdfs:range ;
+      rdfs:comment "IC-4. Dimensions have range" ;
+      sh:message "Every dimension declared in a qb:DataStructureDefinition must have a declared rdfs:range." ;
+      sh:minCount 1 ;
+    ] ;
+  sh:targetClass qb:DimensionProperty ;
+.
+qb:ObservationShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Observation shape" ;
+  sh:property [
+      sh:path qb:dataSet ;
+      rdfs:comment "IC-1. Unique DataSet" ;
+      sh:maxCount 1 ;
+      sh:message "Every qb:Observation has exactly one associated qb:DataSet." ;
+      sh:minCount 1 ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-11. All dimensions required" ;
+      sh:message "Every qb:Observation has a value for each dimension declared in its associated qb:DataStructureDefinition." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .
+    ?dim a qb:DimensionProperty;
+    FILTER NOT EXISTS { $this ?dim [] }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-12. No duplicate observations" ;
+      sh:message "No two qb:Observations in the same qb:DataSet may have the same value for all dimensions." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	{
+		# For each pair of observations test if all the dimension values are the same
+		SELECT (MIN(?equal) AS ?allEqual)
+		WHERE {
+			$this qb:dataSet ?dataset .
+			?obs2 qb:dataSet ?dataset .
+			FILTER (?obs1 != ?obs2)
+			?dataset qb:structure/qb:component/qb:componentProperty ?dim .
+			?dim a qb:DimensionProperty .
+			$this ?dim ?value1 .
+			?obs2 ?dim ?value2 .
+			BIND( ?value1 = ?value2 AS ?equal)
+		}
+		GROUP BY $this ?obs2
+	}
+	FILTER( ?allEqual )
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-13. Required attributes" ;
+      sh:message "Every qb:Observation has a value for each declared attribute that is marked as required." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:dataSet/qb:structure/qb:component ?component .
+	?component qb:componentRequired true ;
+		qb:componentProperty ?attr .
+	FILTER NOT EXISTS { $this ?attr [] }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-14. All measures present" ;
+      sh:message "In a qb:DataSet which does not use a Measure dimension then each individual qb:Observation must have a value for every declared measure." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	# Observation in a non-measureType cube
+	$this qb:dataSet/qb:structure ?dsd .
+	FILTER NOT EXISTS { ?dsd qb:component/qb:componentProperty qb:measureType }
+
+	# verify every measure is present
+	?dsd qb:component/qb:componentProperty ?measure .
+	?measure a qb:MeasureProperty;
+	FILTER NOT EXISTS { $this ?measure [] }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-15. Measure dimension consistent" ;
+      sh:message "In a qb:DataSet which uses a Measure dimension then each qb:Observation must have a value for the measure corresponding to its given qb:measureType." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	# Observation in a measureType-cube
+	$this qb:dataSet/qb:structure ?dsd ;
+		qb:measureType ?measure .
+	?dsd qb:component/qb:componentProperty qb:measureType .
+	# Must have value for its measureType
+	FILTER NOT EXISTS { $this ?measure [] }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-16. Single measure on measure dimension observation" ;
+      sh:message """In a qb:DataSet which uses a Measure dimension then each qb:Observation must only have a value for one measure (by IC-15 this will be the measure corresponding to its qb:measureType).
+
+""" ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	# Observation with measureType
+	$this qb:dataSet/qb:structure ?dsd ;
+		qb:measureType ?measure ;
+		?omeasure [] .
+	# Any measure on the observation
+	?dsd qb:component/qb:componentProperty qb:measureType ;
+		qb:component/qb:componentProperty ?omeasure .
+	?omeasure a qb:MeasureProperty .
+	# Must be the same as the measureType
+	FILTER (?omeasure != ?measure)
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-17. All measures present in measures dimension cube" ;
+      sh:message "In a qb:DataSet which uses a Measure dimension then if there is a Observation for some combination of non-measure dimensions then there must be other Observations with the same non-measure dimension values for each of the declared measures." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	{
+		# Count number of other measures found at each point 
+		SELECT ?numMeasures (COUNT(?obs2) AS ?count)
+		WHERE {
+			{
+				# Find the DSDs and check how many measures they have
+				SELECT ?dsd (COUNT(?m) AS ?numMeasures)
+				WHERE {
+					?dsd qb:component/qb:componentProperty ?m.
+					?m a qb:MeasureProperty .
+				}
+				GROUP BY ?dsd
+			}
+
+			# Observation in measureType cube
+			$this qb:dataSet/qb:structure ?dsd;
+				qb:dataSet ?dataset ;
+				qb:measureType ?m1 .
+    
+			# Other observation at same dimension value
+			?obs2 qb:dataSet ?dataset ;
+				qb:measureType ?m2 .
+			FILTER NOT EXISTS { 
+				?dsd qb:component/qb:componentProperty ?dim .
+				FILTER (?dim != qb:measureType)
+				?dim a qb:DimensionProperty .
+				$this ?dim ?v1 . 
+				?obs2 ?dim ?v2. 
+				FILTER (?v1 != ?v2)
+			}
+
+		}
+		GROUP BY $this ?numMeasures
+		HAVING (?count != ?numMeasures)
+	}
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-18. Consistent data set links" ;
+      sh:message "If a qb:DataSet D has a qb:slice S, and S has an qb:observation O, then the qb:dataSet corresponding to O must be D." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	?slice qb:observation $this .
+	?dataset qb:slice ?slice .
+    FILTER NOT EXISTS { $this qb:dataSet ?dataset . }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-19. a) Codes from code list" ;
+      owl:versionInfo "See section IC-19 in the Data Cubes spec on pre-conditions that need to be met prior to the execution of this constraints. Parts of them are covered by the rules at skos:memberListShape." ;
+      sh:message "If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+    $this qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .
+    ?dim a qb:DimensionProperty ;
+        qb:codeList ?list .
+    ?list a skos:ConceptScheme .
+    $this ?dim ?v .
+    FILTER NOT EXISTS { ?v a skos:Concept ; skos:inScheme ?list }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-19. b) Codes from code list" ;
+      owl:versionInfo "See section IC-19 in the Data Cubes spec on pre-conditions that need to be met prior to the execution of this constraints. Parts of them are covered by the rules at skos:memberListShape." ;
+      sh:message "If a dimension property has a qb:codeList, then the value of the dimension property on every qb:Observation must be in the code list." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+    $this qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .
+    ?dim a qb:DimensionProperty ;
+        qb:codeList ?list .
+    ?list a skos:Collection .
+    $this ?dim ?v .
+    FILTER NOT EXISTS { ?v a skos:Concept ; skos:member+ ?v }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-20. Codes from hierarchy" ;
+      sh:message "If a dimension property has a qb:HierarchicalCodeList with a non-blank qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the qb:parentChildProperty links." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .
+	?dim a qb:DimensionProperty ;
+		qb:codeList ?list .
+	?list a qb:HierarchicalCodeList .
+	$this ?dim ?v .
+	?hierarchy a qb:HierarchicalCodeList ;
+		qb:parentChildProperty ?p .
+	FILTER ( isIRI(?p) ) .
+	FILTER NOT EXISTS {
+		?list qb:hierarchyRoot ?root .
+		FILTER qb:hasZeroOrMore(?root, ?p, ?v) .
+	}
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-21. Codes from hierarchy (inverse)" ;
+      sh:message "If a dimension property has a qb:HierarchicalCodeList with an inverse qb:parentChildProperty then the value of that dimension property on every qb:Observation must be reachable from a root of the hierarchy using zero or more hops along the inverse qb:parentChildProperty links." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:dataSet/qb:structure/qb:component/qb:componentProperty ?dim .
+	?dim a qb:DimensionProperty ;
+		qb:codeList ?list .
+	?list a qb:HierarchicalCodeList .
+	$this ?dim ?v .
+	?hierarchy a qb:HierarchicalCodeList;
+		qb:parentChildProperty ?pcp .
+	FILTER( isBlank(?pcp) )
+	?pcp  owl:inverseOf ?p .
+	FILTER( isIRI(?p) )
+	FILTER NOT EXISTS { 
+		?list qb:hierarchyRoot ?root .
+		FILTER qb:hasZeroOrMore(?root, ?p, ?v) .
+	}
+}""" ;
+    ] ;
+  sh:targetClass qb:Observation ;
+.
+qb:SliceKeyShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Slice key shape" ;
+  sh:sparql [
+      rdfs:comment "IC-7. Slice Keys must be declared" ;
+      sh:message "Every qb:SliceKey must be associated with a qb:DataStructureDefinition." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+    FILTER NOT EXISTS { [a qb:DataStructureDefinition] qb:sliceKey $this }
+}""" ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-8. Slice Keys consistent with DSD" ;
+      sh:message "Every qb:componentProperty on a qb:SliceKey must also be declared as a qb:component of the associated qb:DataStructureDefinition." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:componentProperty ?prop .
+	?dsd qb:sliceKey $this .
+	FILTER NOT EXISTS { ?dsd qb:component [qb:componentProperty ?prop] }
+}""" ;
+    ] ;
+  sh:targetClass qb:SliceKey ;
+.
+qb:SliceShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "Slice shape" ;
+  sh:property [
+      sh:path qb:sliceStructure ;
+      rdfs:comment "IC-9. Unique slice structure" ;
+      sh:maxCount 1 ;
+      sh:message "Each qb:Slice must have exactly one associated qb:sliceStructure." ;
+      sh:minCount 1 ;
+    ] ;
+  sh:sparql [
+      rdfs:comment "IC-10. Slice dimensions complete" ;
+      sh:message "Every qb:Slice must have a value for every dimension declared in its qb:sliceStructure." ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+      sh:select """SELECT $this
+WHERE {
+	$this qb:sliceStructure [qb:componentProperty ?dim] .
+	FILTER NOT EXISTS { $this ?dim [] }
+}""" ;
+    ] ;
+  sh:targetClass qb:Slice ;
+.
+qb:hasZeroOrMore
+  rdf:type sh:SPARQLFunction ;
+  rdfs:comment "A helper function that simulates a property* path in SPARQL, where the property is a variable. This is needed as a helper for the constraints IC-20 and IC-21. The function takes a subject, predicate and object (all of which must be bound) and returns true if the SPARQL expression ?subject ?predicate* ?object has a match." ;
+  rdfs:label "has zero or more" ;
+  sh:ask """ASK {
+    FILTER (?subject = ?object || EXISTS {
+		?subject ?predicate ?o .
+		FILTER qb:hasZeroOrMore(?o, ?predicate, ?object) .
+	})
+}""" ;
+  sh:parameter [
+      sh:path qb:object ;
+      sh:description "The value on the \"right hand side\"." ;
+      sh:name "object" ;
+      sh:order 2 ;
+    ] ;
+  sh:parameter [
+      sh:path qb:predicate ;
+      sh:description "The \"predicate\", i.e. the property to traverse." ;
+      sh:name "predicate" ;
+      sh:nodeKind sh:IRI ;
+      sh:order 1 ;
+    ] ;
+  sh:parameter [
+      sh:path qb:subject ;
+      sh:description "The value on the \"left hand side\"." ;
+      sh:name "subject" ;
+      sh:order 0 ;
+    ] ;
+  sh:prefixes <http://topbraid.org/datacube> ;
+  sh:returnType xsd:boolean ;
+.
+<http://topbraid.org/datacube>
+  rdf:type owl:Ontology ;
+  rdfs:comment "Implements the integrity constraints defined by section 11.1 of the Data Cube specification. Most of the constraints work in standard SHACL-SPARQL, but two constraints require a SHACL function (from SHACL Advanced Features) to recursively walk a dynamically computed property path. An alternative implementation of these constraints could be produced without a helper function based on SHACL-JS." ;
+  rdfs:label "SHACL shapes for RDF Data Cube Vocabulary" ;
+  rdfs:seeAlso <https://www.w3.org/TR/vocab-data-cube/#wf-rules> ;
+  owl:imports <http://datashapes.org/dash> ;
+  owl:imports <http://purl.org/linked-data/cube> ;
+  owl:imports <http://www.w3.org/2004/02/skos/core> ;
+  owl:versionInfo "Created with TopBraid Composer. This is currently completely untested." ;
+  sh:declare [
+      rdf:type sh:PrefixDeclaration ;
+      sh:namespace "http://purl.org/linked-data/cube#"^^xsd:anyURI ;
+      sh:prefix "qb" ;
+    ] ;
+.
+skos:memberListShape
+  rdf:type sh:NodeShape ;
+  rdfs:comment "A shape that applies to all subjects of skos:memberList triples." ;
+  rdfs:label "member list shape" ;
+  sh:rule [
+      rdf:type sh:SPARQLRule ;
+      rdfs:comment "Materializes any skos:member triples from skos:memberList values, if needed." ;
+      sh:construct """CONSTRUCT {
+    $this skos:member ?member .
+}
+WHERE {
+    $this skos:memberList ?list .
+	?list rdf:rest*/rdf:first ?member .
+}""" ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+    ] ;
+  sh:targetSubjectsOf skos:memberList ;
+.
