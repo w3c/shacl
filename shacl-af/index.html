@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US">
   	<head>
-    	<title>SHACL Advanced Features</title>
+    	<title>SHACL Advanced Features 1.1</title>
 		<meta charset="utf-8">
     	<script src='https://www.w3.org/Tools/respec/respec-w3c-common' async="async" class='remove'></script>
     	<script class='remove'>
@@ -28,10 +28,10 @@
 					}
 				},
 			
-				specStatus: "FPWD-NOTE",
+				specStatus: "CG-DRAFT",
 				preProcess : [ prepareSyntaxRules ],
-				edDraftURI: "https://w3c.github.io/data-shapes/shacl-af/",
-				shortName:  "shacl-af",
+				edDraftURI: "https://w3c.github.io/shacl/shacl-af/",
+				shortName:  "shacl-af-11",
 				editors: [
 					{
 						name:       "Holger Knublauch",
@@ -53,10 +53,9 @@
 			         	w3cid: 	73545 
 					}
 				],
-				publishDate: "2017-05-30",
-				wg: "RDF Data Shapes Working Group",
-				wgURI: "https://www.w3.org/2014/data-shapes/",
-				wgPublicList: "public-rdf-shapes",
+				wg: "SHACL Community Group",
+				wgURI: "https://www.w3.org/community/shacl/",
+				wgPublicList: "public-shacl",
 				wgPatentURI:  "https://www.w3.org/2004/01/pp-impl/73865/status",
 				noHighlightCSS: true
 			};
@@ -276,8 +275,23 @@
 
 		<section id='sotd'>
 			<p>
-				Future revisions of this document may be produced by a SHACL W3C Community Group.
+				This is the draft has been submitted to the W3C SHACL Community Group for publication as a Community Report as input for a
+				potential revision of the SHACL Advanced Features document.
 			</p>
+			<p>
+				<b>Changes since the SHACL-AF Working Group Note release of 08 June 2017</b>
+			</p>
+			<ul>
+				<li>Added <a>Property value rules</a> (as syntactic sugar for certain triple rules)</li>
+				<li>Node expressions now work on lists of RDF nodes instead of sets of RDF nodes, allowing duplicates.
+					While the potential presence of duplicates is a change in semantics, the previous use cases of
+					node expressions (in rules) are unaffected because no duplicate triples can be inferred in an RDF graph.</li>
+				<li>Added <a>distinct expression</a></li>
+				<li>Added <a>count expression</a>, <a>min expression</a>, <a>max expression</a>, <a>sum expression</a> and <a>group concat expression</a></li>
+				<li>Added <a>orderBy expression</a>, <a>limit expression</a> and <a>offset expression</a></li>
+				<li>Added <a>minus expression</a></li>
+				<li>Added <a>SPARQL ASK expression</a> and <a>SPARQL SELECT expression</a></li>
+			</ul>
 		</section>
 				
 		<section class="introductory">
@@ -868,7 +882,7 @@ WHERE {
 			<p>
 				This section defines a feature called <dfn data-lt="node expression">node expressions</dfn>.
 				Node expressions are declared as RDF nodes in a <a>shapes graph</a> and instruct a SHACL engine
-				how to compute a set of <a>nodes</a> for a given <a>focus node</a>.
+				how to compute a list of <a>nodes</a> for a given <a>focus node</a>.
 				Each <a>node expression</a> has one of the following types,
 				each of which is defined together with its evaluation semantics in the following sub-sections.
 			</p>
@@ -876,17 +890,17 @@ WHERE {
 				<tr>
 					<th>Node&nbsp;Expression&nbsp;Type</th>
 					<th>Syntax (Informative)</th>
-					<th>Summary</th>
+					<th>Summary (Informative)</th>
 				</tr>
 				<tr>
 					<td><a>Focus Node Expression</a></td>
 					<td><code>sh:this</code></td>
-					<td>The set consisting of the current <a>focus node</a>.</td>
+					<td>The list consisting of the current <a>focus node</a>.</td>
 				</tr>
 				<tr>
 					<td><a>Constant&nbsp;Term&nbsp;Expression</a></td>
 					<td>Any <a>IRI</a> or <a>literal</a> except <code>sh:this</code></td>
-					<td>The set consisting of the given <a>term</a>.</td>
+					<td>The list consisting of the given <a>term</a>.</td>
 				</tr>
 				<tr>
 					<td><a>Function Expression</a></td>
@@ -901,23 +915,83 @@ WHERE {
 				<tr>
 					<td><a>Filter Shape Expression</a></td>
 					<td><a>Blank node</a> with <code>sh:filterShape</code> and <code>sh:nodes</code></td>
-					<td>The sub-set of the input nodes that conform to a given <a>shape</a>.</td>
+					<td>The sub-list of the input nodes that conform to a given <a>shape</a>.</td>
 				</tr>
 				<tr>
 					<td><a>Intersection Expression</a></td>
 					<td><a>Blank node</a> with <code>sh:intersection</code></td>
-					<td>The intersection of two or more input sets.</td>
+					<td>The intersection of two or more input node lists.</td>
 				</tr>
 				<tr>
 					<td><a>Union Expression</a></td>
 					<td><a>Blank node</a> with <code>sh:union</code></td>
-					<td>The union set of two or more input sets.</td>
+					<td>The union (concatenation) of two or more input node lists.</td>
+				</tr>
+				<tr>
+					<td><a>Minus Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:minus</code> and <code>sh:nodes</code></td>
+					<td>The input nodes except those that are in another "minus" list.</td>
+				</tr>
+				<tr>
+					<td><a>Distinct Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:distinct</code></td>
+					<td>The sub-list of the input nodes that are distinct, eliminating duplicates.</td>
+				</tr>
+				<tr>
+					<td><a>Count Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:count</code></td>
+					<td>The number of input nodes as a single <code>xsd:integer</code> node.</td>
+				</tr>
+				<tr>
+					<td><a>Min Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:min</code></td>
+					<td>The smallest of the input nodes.</td>
+				</tr>
+				<tr>
+					<td><a>Max Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:max</code></td>
+					<td>The largest of the input nodes.</td>
+				</tr>
+				<tr>
+					<td><a>Sum Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:sum</code></td>
+					<td>The sum of the input nodes.</td>
+				</tr>
+				<tr>
+					<td><a>Group Concat Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:groupConcat</code></td>
+					<td>A string concatenation of all input nodes.</td>
+				</tr>
+				<tr>
+					<td><a>OrderBy Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:orderBy</code> and <code>sh:nodes</code></td>
+					<td>The input nodes, ordered by a given expression.</td>
+				</tr>
+				<tr>
+					<td><a>Limit Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:limit</code> and <code>sh:nodes</code></td>
+					<td>Only the first N of the input nodes.</td>
+				</tr>
+				<tr>
+					<td><a>Offset Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:offset</code> and <code>sh:nodes</code></td>
+					<td>The input nodes except the first N ones.</td>
+				</tr>
+				<tr>
+					<td><a>SPARQL ASK Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:ask</code>.</td>
+					<td>An <code>xsd:boolean</code> based on the result of a SPARQL ASK query.</td>
+				</tr>
+				<tr>
+					<td><a>SPARQL SELECT Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:select</code>.</td>
+					<td>The results of a SPARQL SELECT query.</td>
 				</tr>
 			</table>
 			<p>
-				The basic idea of these expressions is that they can be used to derive a set of RDF nodes from
-				a given <a>focus node</a>, for example the set of all values of a given property of the focus node.
-				Some of these expressions can be nested, i.e. they use the output of another expression as their input,
+				The basic idea of these expressions is that they can be used to derive a list of RDF nodes from
+				a given <a>focus node</a>, for example all values of a given property of the focus node.
+				Some of these expressions can use the output of another expression as their input,
 				leading to evaluation chains and trees.
 			</p>
 			<p>
@@ -947,12 +1021,14 @@ WHERE {
 				Each of the following sub-sections defines a node expression type with its syntax rules 
 				and evaluation semantics based on a mapping operation <code>Eval($expr, $this)</code> where the
 				first argument <code>$expr</code> is the given expression, <code>$this</code> is the current <a>focus node</a>
-				and which produces a set of RDF nodes.
+				and which produces a list of RDF nodes.
+				Unless specified otherwise, the members of these lists are handled in their natural order.
 			</p>
 			<p class="syntax">
 				<span data-syntax-rule="node-expressions-recursion">A <code>node expression</code> cannot recursively have itself
 				as a "nested" node expression, e.g. as <a>value</a> of <code>sh:nodes</code>.</span>
 			</p>
+
 			<section id="node-expressions-focus">
 				<h3>Focus Node Expressions</h3>
 				<p>
@@ -962,10 +1038,11 @@ WHERE {
 					<div class="def-header">EVALUATION OF FOCUS NODE EXPRESSIONS</div>
 					<div class="def-text-body">
 						For the <a>focus node expression</a> <code>sh:this</code>, <code>Eval(sh:this, $this)</code> produces
-						the set <code>{ $this }</code>.
+						the list of length 1 with <code>$this</code> as its only member.
 					</div>
 				</div>
 			</section>
+
 			<section id="node-expressions-constant">
 				<h3>Constant Term Expressions</h3>
 				<p>
@@ -975,10 +1052,11 @@ WHERE {
 					<div class="def-header">EVALUATION OF CONSTANT TERM EXPRESSIONS</div>
 					<div class="def-text-body">
 						For the <a>constant term expression</a> <code>$expr</code>, <code>Eval($expr, $this)</code> produces
-						the set <code>{ $expr }</code>.
+						the list of length 1 with <code>$expr</code> as its only member.
 					</div>
 				</div>
 			</section>
+
 			<section id="node-expressions-filter-shape">
 				<h3>Filter Shape Expressions</h3>
 				<p class="syntax">
@@ -991,11 +1069,12 @@ WHERE {
 					<div class="def-text-body">
 						For the <a>filter shape expression</a> <code>$expr</code> with <code>S</code> being the <a>shape</a>
 						that is the <a>value</a> of <code>sh:filterShape</code> and <code>N</code> being the <a>node expression</a> that
-						is the <a>value</a> of <code>sh:nodes</code>, <code>Eval($expr, $this)</code> produces the set of nodes for
-						each <a>node</a> <code>n</code> produced by evaluating <code>N</code> where <code>n</code> <a>conforms</a> to <code>S</code>.
+						is the <a>value</a> of <code>sh:nodes</code>, <code>Eval($expr, $this)</code> produces the list of nodes for
+						each <a>node</a> <code>n</code> produced by <code>Eval(N, $this)</code> where <code>n</code> <a>conforms</a> to <code>S</code>.
 					</div>
 				</div>
 			</section>
+
 			<section id="node-expressions-function">
 				<h3>Function Expressions</h3>
 				<p class="syntax">
@@ -1008,13 +1087,13 @@ WHERE {
 					<div class="def-header">EVALUATION OF FUNCTION EXPRESSIONS</div>
 					<div class="def-text-body">
 						For the <a>function expression</a> <code>$expr</code>, <code>Eval($expr, $this)</code> produces
-						the set of <a>nodes</a> returned by evaluating the <a>SHACL function</a> specified as <a>predicate</a>
+						the list of <a>nodes</a> returned by evaluating the <a>SHACL function</a> specified as <a>predicate</a>
 						of the triple <code>T</code> mentioned above.
 						The arguments of the function call(s) are based on the results of the <a>node expressions</a> listed
 						in the <a>object</a> list of <code>T</code> so that the first list <a>member</a> is used for the first argument, etc.
-						This is done for all combinations of <a>nodes</a> produced by the <a>node expression</a>.
-						If one of the <a>node expressions</a> produces the empty set and the corresponding function <a>parameter</a>
-						is non-optional, then the result is the empty set.
+						This is done for all combinations of <a>nodes</a> produced by each <a>node expression</a>.
+						If one of the <a>node expressions</a> produces the empty list and the corresponding function <a>parameter</a>
+						is non-optional (see <a href="https://www.w3.org/TR/shacl/#constraint-components-parameters"><code>sh:optional</code></a>), then the result is the empty list.
 					</div>
 				</div>
 				<p>
@@ -1027,6 +1106,7 @@ WHERE {
 <pre class="example-shapes" style="margin-top: 0">
 [  ex:concat ( 
 		[ sh:path ex:firstName ]
+		" "
 		[ sh:path ex:lastName ] 
 	)
 ] .</pre>
@@ -1036,13 +1116,14 @@ WHERE {
 {
 	$this ex:firstName ?a .
 	$this ex:lastName ?b .
-	BIND (ex:concat(?a, ?b) AS ?result) .
+	BIND (ex:concat(?a, " ", ?b) AS ?result) .
 }
 </pre>
 						</td>
 					</tr>
 				</table>
 			</section>
+
 			<section id="node-expressions-path">
 				<h3>Path Expressions</h3>
 				<p class="syntax">
@@ -1056,8 +1137,9 @@ WHERE {
 						For the <a>path expression</a> <code>$expr</code> that has the property path <code>P</code> as its
 						<a>value</a> for <code>sh:path</code> and the <a>node expression</a> <code>N</code> as its <a>value</a>
 						for <code>sh:nodes</code> (defaulting to the <a>focus node expression</a> if absent),
-						<code>Eval($expr, $this)</code> produces the set of <a>values</a> of all nodes produced by <code>N</code>
+						<code>Eval($expr, $this)</code> produces the list of <a>values</a> of all nodes produced by <code>Eval(N, $this)</code>
 						for the <a>property path</a> <code>P</code>.
+						The order of results of these lists is undefined and they do not contain duplicates.
 					</div>
 				</div>
 				<p>
@@ -1086,6 +1168,7 @@ WHERE {
 					</tr>
 				</table>
 			</section>
+
 			<section id="intersection">
 				<h3>Intersection Expressions</h3>
 				<p class="syntax">
@@ -1098,10 +1181,12 @@ WHERE {
 					<div class="def-text-body">
 						For the <a>intersection expression</a> <code>$expr</code> that has the list <code>L</code> as its
 						<a>value</a> for <code>sh:intersection</code>, <code>Eval($expr, $this)</code> produces
-						the set of <a>nodes</a> that are in all of the result sets produced by the <a>members</a> of <code>L</code>.
+						the list of <a>nodes</a> that are produced by the first node expression from the list and are also
+						in the result lists produced by the other <a>members</a> of <code>L</code>.
 					</div>
 				</div>
 			</section>
+
 			<section id="union">
 				<h3>Union Expressions</h3>
 				<p class="syntax">
@@ -1114,12 +1199,13 @@ WHERE {
 					<div class="def-text-body">
 						For the <a>union expression</a> <code>$expr</code> that has the list <code>L</code> as its
 						<a>value</a> for <code>sh:union</code>, <code>Eval($expr, $this)</code> produces
-						the set of <a>nodes</a> that are in any of the result sets produced by all of the <a>members</a> of <code>L</code>.
+						the list of <a>nodes</a> that are the concatenation of the result lists produced by all of the <a>members</a> of <code>L</code>,
+						preserving their original order.
 					</div>
 				</div>
 				<p>
 					As illustrated in the following example, <a>union expressions</a> are comparable to
-					SPARQL UNION clauses.
+					SPARQL UNION clauses.  Similar to SPARQL, they may produce duplicate results.
 				</p>
 				<table style="width:100%; border-collapse: collapse;">
 					<tr>
@@ -1141,6 +1227,247 @@ WHERE {
 						</td>
 					</tr>
 				</table>
+			</section>
+
+			<section id="minus">
+				<h3>Minus Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="minus">A <dfn>minus expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:minus</code> which is a well-formed <a>node expression</a>
+					and exactly one <a>value</a> for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.
+					</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF MINUS EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>minus expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:minus</code> and
+						the <a>node expression</a> <code>M</code> as its <a>value</a> for <code>sh:nodes</code>,
+						<code>Eval($expr, $this)</code> produces the list of <a>nodes</a> that are in <code>Eval(N, $this)</code> but not in <code>Eval(M, $this)</code>.
+					</div>
+				</div>
+			</section>
+
+			<section id="distinct">
+				<h3>Distinct Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="distinct">A <dfn>distinct expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:distinct</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF DISTINCT EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>distinct expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:distinct</code>,
+						<code>Eval($expr, $this)</code> produces the list of <a>nodes</a> that are in <code>Eval(N, $this)</code> dropping any
+						duplicate nodes.
+					</div>
+				</div>
+			</section>
+
+			<section id="count">
+				<h3>Count Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="count">A <dfn>count expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:count</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF COUNT EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>count expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:count</code>,
+						<code>Eval($expr, $this)</code> produces the list consisting of exactly one <a>literal</a> with <a>datatype</a> <code>xsd:integer</code>
+						representing the size of the input list produced by <code>Eval(N, $this)</code>.
+					</div>
+				</div>
+			</section>
+
+			<section id="min">
+				<h3>Min Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="min">A <dfn>min expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:min</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF MIN EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>min expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:min</code>,
+						<code>Eval($expr, $this)</code> produces the empty list if the input list produced by <code>Eval(N, $this)</code> is empty,
+						or the list consisting of exactly one node that is the minimum input node as defined by <a href="https://www.w3.org/TR/sparql11-query/#defn_aggMin">SPARQL MIN</a>.
+					</div>
+				</div>
+			</section>
+
+			<section id="max">
+				<h3>Max Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="max">A <dfn>max expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:max</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF MAX EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>max expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:max</code>,
+						<code>Eval($expr, $this)</code> produces the empty list if the input list produced by <code>Eval(N, $this)</code> is empty,
+						or the list consisting of exactly one node that is the maximum input node as defined by <a href="https://www.w3.org/TR/sparql11-query/#defn_aggMax">SPARQL MAX</a>.
+					</div>
+				</div>
+			</section>
+
+			<section id="sum">
+				<h3>Sum Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="sum">A <dfn>sum expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:sum</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF SUM EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>sum expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>S</code> as its <a>value</a> for <code>sh:sum</code>,
+						and for which the results of <code>Eval(S, $this)</code> are the nodes <code>n</code>,
+						<code>Eval($expr, $this)</code> produces the list consisting of exactly one node that is the sum of all <code>n</code> as defined
+						by <a href="https://www.w3.org/TR/sparql11-query/#defn_aggSum">SPARQL SUM</a>, producing the empty list of any of the nodes
+						can not be summed up.
+					</div>
+				</div>
+			</section>
+
+			<section id="groupConcat">
+				<h3>Group Concat Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="concat">A <dfn>group concat expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:groupConcat</code> which is a well-formed <a>node expression</a>.</span>
+					<span data-syntax-rule="separator">A <a>group concat expression</a> can have a single value for the property <code>sh:separator</code>
+					which is <a>literal</a> with <a>datatype</a> <code>xsd:string</code>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF GROUP CONCAT EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>group concat expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>C</code> as its <a>value</a> for <code>sh:groupConcat</code>,
+						<code>Eval($expr, $this)</code> produces the list consisting of exactly one <a>literal</a> with <a>datatype</a> <code>xsd:string</code>
+						consisting of the string representation of the nodes from the input list produced by <code>Eval(C, $this)</code>.
+						If <code>S</code> is the <a>value</a> of <code>sh:separator</code> then <code>S</code> will be inserted in between each pair of strings.
+						It is up to the implementation to decide how to represent individual nodes as strings.
+						For example, resources may be represented by their values of <code>rdfs:label</code> in the user's preferred language.
+						However, if an individual node is a <a>literal</a> with <a>datatype</a> <code>xsd:string</code> then the lexical form of that node is used.
+					</div>
+				</div>
+				<p>
+					Tip: in order to control exactly how individual values get rendered, wrap the input node expression with a <a>function expression</a> that
+					produces a string literal.
+				</p>
+			</section>
+
+			<section id="orderBy">
+				<h3>OrderBy Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="orderBy">An <dfn>orderBy expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:orderBy</code> which is a well-formed <a>node expression</a> and
+					with exactly one value for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.</span>
+					<span data-syntax-rule="desc">An <a>orderBy expression</a> can have one <a>value</a> for the property <code>sh:desc</code> which
+					is either <code>true</code> or <code>false</code>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF ORDERBY EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>orderBy expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:nodes</code> and
+						the <a>node expression</a> <code>O</code> as its <a>value</a> for <code>sh:orderBy</code>,
+						<code>Eval($expr, $this)</code> produces a list consisting of exactly the results <code>n</code> of <code>Eval(N, $this)</code>
+						ordered by the first node from <code>Eval(O, n)</code> according to the node comparison policy of the
+						<a href="https://www.w3.org/TR/sparql11-query/#modOrderBy">SPARQL ORDER BY</a> operator.
+						If <code>sh:desc</code> is <code>true</code> for the expression, then the order is descending, otherwise ascending. 
+					</div>
+				</div>
+			</section>
+
+			<section id="limit">
+				<h3>Limit Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="limit">A <dfn>limit expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:limit</code> which is a <a>literal</a> with <a>datatype</a> <code>xsd:integer</code> and
+					with exactly one value for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF LIMIT EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>limit expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:nodes</code> and
+						<code>L</code> as its <a>value</a> for <code>sh:limit</code>,
+						<code>Eval($expr, $this)</code> produces the list consisting of exactly the first <code>L</code> results of <code>Eval(N, $this)</code>.
+					</div>
+				</div>
+			</section>
+
+			<section id="offset">
+				<h3>Offset Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="offset">An <dfn>offset expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:offset</code> which is a <a>literal</a> with <a>datatype</a> <code>xsd:integer</code> and
+					with exactly one value for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF OFFSET EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>offset expression</a> <code>$expr</code> that has
+						the <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:nodes</code> and
+						<code>O</code> as its <a>value</a> for <code>sh:offset</code>,
+						<code>Eval($expr, $this)</code> produces the list consisting of the results of <code>Eval(N, $this)</code> except for the first <code>O</code> ones.
+					</div>
+				</div>
+			</section>
+
+			<section id="ask">
+				<h3>SPARQL ASK Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="ask">A <dfn>SPARQL ASK expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:ask</code> which is string literal. 
+					The blank node may have <a>values</a> for the property <code>sh:prefixes</code> and these values are <a>IRIs</a> or <a>blank nodes</a>.
+					Using the <a>values</a> of <code>sh:prefixes</code> as defined by
+					<a href="https://www.w3.org/TR/shacl/#sparql-prefixes">5.2.1 Prefix Declarations for SPARQL Queries</a>,
+					the <a>value</a> of <code>sh:ask</code> must be valid SPARQL 1.1 ASK query.
+					The blank node may also have exactly one value for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF SPARQL ASK EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>SPARQL ASK expression</a> <code>$expr</code> that represents the SPARQL ASK query <code>A</code>
+						and that has the (optional) <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:nodes</code>:
+						If <code>N</code> is not present, then <code>Eval($expr, $this)</code> produces the list of length 1 consisting of either <code>true</code> or
+						<code>false</code> based on the result of executing <code>A</code> with the node <code>$this</code> as the a pre-bound
+						variable <code>$this</code>.
+						If <code>N</code> is present, then <code>Eval($expr, $this)</code> produces a corresponding list of boolean literals for each node
+						produced by <code>Eval(N, $this)</code> as pre-bound variable <code>$this</code>. 
+					</div>
+				</div>
+			</section>
+
+			<section id="select">
+				<h3>SPARQL SELECT Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="select">A <dfn>SPARQL SELECT expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for the property <code>sh:select</code> which is string literal. 
+					The blank node may have <a>values</a> for the property <code>sh:prefixes</code> and these values are <a>IRIs</a> or <a>blank nodes</a>.
+					Using the <a>values</a> of <code>sh:prefixes</code> as defined by
+					<a href="https://www.w3.org/TR/shacl/#sparql-prefixes">5.2.1 Prefix Declarations for SPARQL Queries</a>,
+					the <a>value</a> of <code>sh:select</code> must be valid SPARQL 1.1 SELECT query with exactly one result variable.
+					The blank node may also have exactly one value for the property <code>sh:nodes</code> which is a well-formed <a>node expression</a>.</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF SPARQL SELECT EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>SPARQL SELECT expression</a> <code>$expr</code> that represents the SPARQL SELECT query <code>S</code>
+						and that has the (optional) <a>node expression</a> <code>N</code> as its <a>value</a> for <code>sh:nodes</code>:
+						If <code>N</code> is not present, then <code>Eval($expr, $this)</code> produces the list of all bindings of the result variable produced
+						by executing <code>S</code> with the node <code>$this</code> as the a pre-bound variable <code>$this</code>.
+						If <code>N</code> is present, then <code>Eval($expr, $this)</code> produces a list concatenating the corresponding results when <code>S</code> is
+						executed for each node produced by <code>Eval(N, $this)</code> as pre-bound variable <code>$this</code>. 
+					</div>
+				</div>
 			</section>
 		</section>
 		
@@ -1215,7 +1542,7 @@ ex:FilterExampleShape
 			</p>
 			<p>
 				The <a>SHACL rules</a> feature defined in this section includes a general framework using the properties
-				such as <code>sh:rule</code> and <code>sh:condition</code>, plus an extension mechanism for specific <a>rule types</a>.
+				such as <code>sh:values</code>, <code>sh:rule</code> and <code>sh:condition</code>, plus an extension mechanism for specific <a>rule types</a>.
 				This document defines two such rule types: <a>Triple rules</a> and <a>SPARQL rules</a>.
 				Other documents, including SHACL JavaScript Extensions [[shacl-js]], can define additional types of rules.
 			</p>
@@ -1229,7 +1556,7 @@ ex:FilterExampleShape
 					The rule applies only to well-formed rectangles that <a>conform</a> to the <code>ex:Rectangle</code> <a>shape</a>,
 					e.g. by having exactly one width and height, both integers.
 				</p>
-				<pre class="example-shapes" title="A rule to classify certain rectangles as squares">
+				<pre class="example-shapes" title="A triple rule to classify certain rectangles as squares">
 ex:Rectangle
 	a rdfs:Class, sh:NodeShape ;
 	rdfs:label "Rectangle" ;
@@ -1361,6 +1688,21 @@ ex:RectangleRulesShape
 			ex:multiply ( [ sh:path ex:width ] [ sh:path ex:height ] ) ;
 		] ;
 		sh:condition ex:RectangleShape ;    # Rule only applies to Rectangles that conform to ex:RectangleShape
+	] .</pre>
+				<p id="example-property-value-rule">
+					Finally, the following variation does the same inferences but using a <a>property value rule</a>.
+					These rules are using a more compact syntax than triple rules and are directly attached to <a>property shapes</a>
+					with the property <code>sh:values</code>.
+				</p>
+				<pre class="example-shapes" title="A property value rule to compute the area of a Rectangle">
+ex:RectangleRulesShape
+	a sh:NodeShape ;
+	sh:targetClass ex:Rectangle ;
+	sh:property [
+		sh:path ex:area ;    # Computes the values of the ex:area property at the focus nodes
+		sh:values [
+			ex:multiply ( [ sh:path ex:width ] [ sh:path ex:height ] ) ;
+		] ;
 	] .</pre>
 			</section>
 	
@@ -1593,8 +1935,33 @@ ex:RuleOrderExampleShape
 						<a>predicate</a> <code>p</code> and <a>object</a> <code>o</code>.
 					</div>
 				</div>
-			</section>
 
+				<section id="PropertyValueRule">
+					<h4>Property Value Rules</h4>
+					<p>
+						<a>Property value rules</a> provide syntactic sugar for <a>triple rules</a>, supporting the use case where
+						triple rules are used to infer values of a single property at a single focus node.
+					</p>
+					<p>
+						A <dfn data-lt="property value rules">property value rule</dfn> is represented by a <a>value</a> <code>V</code> of the property
+						<code>sh:values</code> of a <a>property shape</a> <code>P</code> that has a <a>IRI</a> <code>path</code> as its value for <code>sh:path</code>.
+						<span data-syntax-rule="values">The <a>values</a> of the property <code>sh:values</code> must be well-formed <a>node expressions</a>.</span>
+						For each node shape <code>N</code> that has <code>P</code> as <a>value</a> of <code>sh:property</code>, there is an implicit <a>triple rule</a> <code>T</code>
+						equivalent to the following triples (unless either <code>P</code> or <code>N</code> have <code>true</code> as the <a>value</a> of <code>sh:deactivated</code>):
+					</p>
+					<ul>
+						<li><code>N sh:rule T</code></li>
+						<li><code>T rdf:type sh:TripleRule</code></li>
+						<li><code>T sh:subject sh:this</code></li>
+						<li><code>T sh:predicate path</code></li>
+						<li><code>T sh:object V</code></li>
+					</ul>
+					<p>
+						An <a href="#example-property-value-rule">example</a> property value rule had already been provided.
+					</p>
+				</section>
+			</section>
+			
 			<section id="SPARQLRule">
 				<h3>SPARQL Rules</h3>
 				<p>
