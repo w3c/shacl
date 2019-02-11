@@ -286,6 +286,9 @@
 				<li>Node expressions now work on lists of RDF nodes instead of sets of RDF nodes, allowing duplicates.
 					While the potential presence of duplicates is a change in semantics, the previous use cases of
 					node expressions (in rules) are unaffected because no duplicate triples can be inferred in an RDF graph.</li>
+				<li>sh:nodes is no longer mandatory for sh:filterShape expressions (defaults to sh:this, consistent with sh:path)</li>
+				<li>Added <a>exists expression</a></li>
+				<li>Added <a>if expression</a></li>
 				<li>Added <a>distinct expression</a></li>
 				<li>Added <a>count expression</a>, <a>min expression</a>, <a>max expression</a>, <a>sum expression</a> and <a>group concat expression</a></li>
 				<li>Added <a>orderBy expression</a>, <a>limit expression</a> and <a>offset expression</a></li>
@@ -913,8 +916,18 @@ WHERE {
 					<td>The <a>values</a> of a given <a>property path</a>.</td>
 				</tr>
 				<tr>
+					<td><a>Exists Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:exists</code></td>
+					<td>The list consisting of either <code>true</code> or <code>false</code> depending on whether input nodes exist.</td>
+				</tr>
+				<tr>
+					<td><a>If Expression</a></td>
+					<td><a>Blank node</a> with <code>sh:if</code></td>
+					<td>The results of either <code>sh:then</code> or <code>sh:else</code> depending on whether the <code>sh:if</code> node expression is [<code>true</code>].</td>
+				</tr>
+				<tr>
 					<td><a>Filter Shape Expression</a></td>
-					<td><a>Blank node</a> with <code>sh:filterShape</code> and <code>sh:nodes</code></td>
+					<td><a>Blank node</a> with <code>sh:filterShape</code></td>
 					<td>The sub-list of the input nodes that conform to a given <a>shape</a>.</td>
 				</tr>
 				<tr>
@@ -1057,19 +1070,56 @@ WHERE {
 				</div>
 			</section>
 
+			<section id="node-expressions-exists">
+				<h3>Exists Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="ExistsExpression">An <dfn>exists expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for <code>sh:exists</code> (which is a well-formed <a>shape</a>).</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF EXISTS EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>exists expression</a> <code>$expr</code> with <code>N</code> being the <a>node expression</a> that
+						is the <a>value</a> of <code>sh:exists</code>, <code>Eval($expr, $this)</code> produces the list consisting of exactly the node <code>true</code>
+						if <code>Eval(N, $this)</code> produces at least one <a>node</a>, and the list consisting of exactly the node <code>false</code> otherwise.
+					</div>
+				</div>
+			</section>
+
+			<section id="node-expressions-if">
+				<h3>If Expressions</h3>
+				<p class="syntax">
+					<span data-syntax-rule="IfExpression">An <dfn>if expression</dfn> is a <a>blank node</a>
+					with exactly one <a>value</a> for <code>sh:if</code> (which is a well-formed <a>node expression</a>),
+					at most one <a>value</a> for <code>sh:then</code> (which is a well-formed <a>node expression</a>)
+					and at most one <a>value</a> for <code>sh:else</code> (which is a well-formed <a>node expression</a>).</span>
+				</p>
+				<div class="def def-text">
+					<div class="def-header">EVALUATION OF IF EXPRESSIONS</div>
+					<div class="def-text-body">
+						For the <a>if expression</a> <code>$expr</code> with <code>IF</code> being the <a>node expression</a> that
+						is the <a>value</a> of <code>sh:if</code>, and <code>THEN</code> and <code>ELSE</code> being corresponding
+						<a>values</a> of <code>sh:then</code> and <code>sh:else</code>, resp.
+						If <code>Eval(IF, $this)</code> produces the list consisting of exactly the node <code>true</code>
+						then produce <code>Eval(THEN, $this)</code> (or the empty list if THEN is absent),
+						otherwise produce <code>Eval(ELSE, $this)</code> (or the empty list if ELSE is absent).
+					</div>
+				</div>
+			</section>
+
 			<section id="node-expressions-filter-shape">
 				<h3>Filter Shape Expressions</h3>
 				<p class="syntax">
 					<span data-syntax-rule="FilterShapeExpression">A <dfn>filter shape expression</dfn> is a <a>blank node</a>
 					with exactly one <a>value</a> for <code>sh:filterShape</code> (which is a well-formed <a>shape</a>)
-					and exactly one <a>value</a> for <code>sh:nodes</code> (which is a well-formed <a>node expression</a>).</span>
+					and at most one <a>value</a> for <code>sh:nodes</code> (which is a well-formed <a>node expression</a>).</span>
 				</p>
 				<div class="def def-text">
 					<div class="def-header">EVALUATION OF FILTER SHAPE EXPRESSIONS</div>
 					<div class="def-text-body">
 						For the <a>filter shape expression</a> <code>$expr</code> with <code>S</code> being the <a>shape</a>
 						that is the <a>value</a> of <code>sh:filterShape</code> and <code>N</code> being the <a>node expression</a> that
-						is the <a>value</a> of <code>sh:nodes</code>, <code>Eval($expr, $this)</code> produces the list of nodes for
+						is the <a>value</a> of <code>sh:nodes</code> (defaulting to the <a>focus node expression</a> if absent), <code>Eval($expr, $this)</code> produces the list of nodes for
 						each <a>node</a> <code>n</code> produced by <code>Eval(N, $this)</code> where <code>n</code> <a>conforms</a> to <code>S</code>.
 					</div>
 				</div>
