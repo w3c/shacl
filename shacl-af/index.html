@@ -51,6 +51,14 @@
 			         	url:        "http://steyskal.info/",
 			         	company:    "WU Vienna/Siemens AG",
 			         	w3cid: 	73545 
+					},
+					{
+						name:       "Vladimir Alexiev",
+						url:        "https://github.com/VladimirAlexiev/my",
+						company:    "Ontotext Corp",
+						companyURL: "http://ontotext.com",
+            w3cid: 	    56618
+
 					}
 				],
 				wg: "SHACL Community Group",
@@ -642,8 +650,232 @@ ex:USCitizenShape
 					when the SPARQL SELECT query has been executed with the <a>pre-bound</a> parameter values.
 				</p>
 			</section>
-		</section>
-		
+
+      <section id="nodeshape-targets">
+        <h3>NodeShape Targets</h3>
+        <p>
+          Sometimes it is useful to find nodes by shape, and then validate them using another shape.
+          To do this, you can use <code>sh:targetShape</code> that is a <code>sh:NodeShape</code>:
+        </p>
+        <pre class="example-shapes">
+ex:MyNodeShape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    &lt;NodeShape constructs for target&gt;
+  ];
+  &lt;NodeShape constructs for validation&gt;
+.</pre>
+        <p>In the following subsections we show several examples of this design.</p>
+        <section id="target-by-property-and-object">
+          <h4>Target by Property and Object</h4>
+          <p>Norwegians must have exactly one norwegianID:</p>
+          <pre class="example-shapes">
+ex:NorwegianShape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    sh:property [sh:path ex:nationality; sh:hasValue ex:Norway];
+  ];
+  sh:property [sh:path ex:norwegianID; sh:minCount 1; sh:maxCount 1];
+.</pre>
+        </section>
+        <section id="target-namespace-instances">
+          <h4>Target Namespace Instances</h4>
+          <p>All instances in a given namespace must have a certain shape (class <code>ex:Company</code> and appropriate <code>dc:type</code>):</p>
+          <pre class="example-shapes">
+ex:CompanyShape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    sh:nodeKind sh:IRI;
+    sh:pattern "^https://company-graph.ontotext.com/resource/company/";
+  ];
+  sh:class ex:Company;
+  sh:property [sh:path dc:type; sh:in ("conglomerate" "collective" "enterprise")];
+.</pre>
+        </section>
+        <section id="target-all-langstrings">
+          <h4>Target All langStrings</h4>
+          <p>All langStrings must have one of a predefind set of languages:</p>
+          <pre class="example-shapes">
+ex:langStringShape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    sh:datatype rdf:langString;
+  ];
+  sh:languageIn ("en" "bg");
+.</pre>
+        </section>
+        <section id="target-by-cardinality">
+          <h4>Target By Cardinality</h4>
+          <p>Let's say a person Steve is very popular, so everyone who knows at least three people must know Steve:</p>
+          <pre class="example-shapes">
+ex:Personshape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape; 
+    sh:property [sh:path foaf:knows; sh:minCount 3];
+  ];
+  sh:property [sh:path foaf:knows; sh:hasValue ex:Steve];
+.</pre>
+        </section>
+        <section id="semantic-type-discrimination">
+          <h4>Semantic Type Discrimination</h4>
+          <p>
+            In some datasets, instances are not discriminated by <code>rdf:type</code> alone, but also by other traits.
+            Often more than one check needs to be performed.
+          </p>
+          <p>
+            Eg in Geonames, all instances have type <code>gn:Feature</code>, and are further discriminated by <code>gn:featureCode</code>.
+            <a href="https://www.geonames.org/export/codes.html">featureCode</a> is a 2-level classification of some 650 codes
+            that includes everything from continents to mountains to pipelines to hotels.
+          </p>
+          <p>
+            Imagine that you're interested only in countries and top-level administrative divisions (states, provinces and the like),
+            and the following Geonames fields (a lot more are available):</p>
+          <ul>
+            <li>A bunch of codes (<code>gn:A.PCLI, gn:A.PCLD</code>, etc) correspond to the concept "country"</li>
+            <li>Countries have <code>gn:countryCode</code></li>
+            <li>Only the code <code>gn:A.ADM1</code> corresponds to top-level administrative divisions</li>
+            <li>Administrative divisions have <code>gn:parentCountry</code></li>
+          </ul>
+          <pre class="example-shapes">
+gn:Feature a sh:NodeShape, rdf:Class;
+  # implicit: sh:targetClass gn:Feature;
+  sh:property [sh:path gn:name;         sh:datatype xsd:string; sh:minCount 1; sh:maxCount 1];
+  sh:property [sh:path gn:featureClass; sh:nodeKind sh:IRI;     sh:minCount 1; sh:maxCount 1];
+  sh:property [sh:path gn:featureCode;  sh:nodeKind sh:IRI;     sh:minCount 1; sh:maxCount 1];
+.
+
+ex:CountryShape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    sh:class gn:Feature;
+    sh:property [sh:path gn:featureCode; 
+                 sh:in (gn:A.PCLI gn:A.PCLD gn:A.PCLIX
+                        gn:A.PCLS gn:A.PCL gn:A.TERR gn:A.PCLF)];
+  ];
+  sh:property [sh:path gn:countryCode; sh:datatype xsd:string; sh:minCount 1; sh:maxCount 1];
+.
+
+ex:ADM1Shape a sh:NodeShape;
+  sh:targetShape [a sh:NodeShape;
+    sh:class gn:Feature;
+    sh:property [sh:path gn:featureCode; sh:hasValue gn:A.ADM1];
+  ];
+  sh:property [sh:path gn:parentCountry; sh:node ex:CountryShape; sh:minCount 1; sh:maxCount 1];
+.</pre>
+        </section>
+        <section id="targeting-and-reference-shapes">
+          <h4>Targeting and Reference Shapes</h4>
+          <p>
+            In the last example we stated that <code>gn:parentCountry</code> must point to something that satisfies <code>ex:CountryShape</code>.
+            This means that every time we validate <code>ex:ADM1Shape</code>, we need to validate its country
+            (together with the country-specific properties).
+            So the validation of ADM1 must recurse into validation of Country.
+          </p>
+          <p>
+            This is not always convenient as it may be hard to control this recursive process.
+            Furthermore, if <code>ex:CountryShape</code> referred back to <code>ex:ADM1Shape</code> of its regions,
+            we'd have a recursive shape and the result would be undefined.
+          </p>
+          <p>
+            It may therefore be more convenient to check only the <strong>existence</strong> of Country from ADM1,
+            and depend that some other process will check the validity of Country.
+            We could do it like this:
+          </p>
+          <pre class="example-shapes">
+ex:CountryRefShape a sh:NodeShape;
+  sh:class gn:Feature;
+  sh:property [sh:path gn:featureCode; 
+               sh:in (gn:A.PCLI gn:A.PCLD gn:A.PCLIX
+                      gn:A.PCLS gn:A.PCL gn:A.TERR gn:A.PCLF)];
+.
+
+ex:CountryShape a sh:NodeShape;
+  sh:targetShape ex:CountryRefShape;
+  sh:property [sh:path gn:countryCode; sh:datatype xsd:string; sh:minCount 1; sh:maxCount 1];
+.
+
+ex:ADM1RefShape a sh:NodeShape;
+  sh:class gn:Feature;
+  sh:property [sh:path gn:featureCode; sh:hasValue gn:A.ADM1];
+.
+
+ex:ADM1Shape a sh:NodeShape;
+  sh:targetShape ex:ADM1RefShape;
+  sh:property [sh:path gn:parentCountry; sh:node ex:CountryRefShape; sh:minCount 1; sh:maxCount 1];
+.</pre>
+          <p>
+            The significant change is in the last line: ADM1 checks <code>ex:CountryRefShape</code> rather than <code>ex:CountryShape</code>.
+            And we reuse <code>ex:CountryRefShape</code> as both:
+          </p>
+          <ul>
+            <li>Existence check in <code>ex:ADM1Shape</code></li>
+            <li>Targeting shape in <code>ex:CountryShape</code></li>
+          </ul>
+        </section>
+        <section id="politicians-and-parties">
+          <h4>Politicians and Parties</h4>
+          <p>
+            Let's say every Party has at least one Politician,
+            every Politician belongs to exactly one Party (ok, that is unrealistic),
+            politicians are defined by a combination of <code>rdf:type</code> and <code>dc:type</code>,
+            and both Parties and Politicians adhere to one of two politics (Democrat vs Republican).
+          </p>
+          <p>If we model this with two shapes that refer to each other, we'd have recursive shapes. So again we use two shapes for every entity:</p>
+          <ul>
+            <li>A "smaller" <code>*RefShape</code> that just checks existence in terms of "semantic type discrimination"</li>
+            <li>A "bigger" <code>*Shape</code> that checks all other properties of the instance, and uses the RefShape for targeting</li>
+          </ul>
+          <p>This eliminates the recursion.</p>
+          <pre class="example-shapes">
+ex:PoliticianRefShape a sh:NodeShape;
+  sh:property [sh:path rdf:type; sh:in (foaf:Person dbo:Person)];
+  sh:property [sh:path dc:type; sh:hasValue "politician"];
+.
+
+ex:PoliticianShape a sh:NodeShape;
+  sh:targetShape ex:PoliticianRefShape;
+  sh:property [sh:path ex:politics; sh:in ("Democrat" "Republican"); sh:minCount 1; sh:maxCount 1];
+  sh:property [sh:path ex:party; sh:node ex:PartyRefShape; sh:minCount 1; sh:maxCount 1];
+.
+
+ex:PartyRefShape a sh:NodeShape;
+  sh:property [sh:path rdf:type; sh:hasValue foaf:Organization];
+  sh:property [sh:path dc:type; sh:hasValue "political party"];
+.
+
+ex:PartyShape a sh:NodeShape;
+  sh:targetShape ex:PartyRefShape;
+  sh:property [sh:path ex:politics; sh:in ("Democrat" "Republican"); sh:minCount 1; sh:maxCount 1];
+  sh:property [sh:path ex:politician; sh:node ex:PoliticianRefShape; sh:minCount 1];
+.</pre>
+        </section>
+        <section id="performance-considerations">
+          <h4>Performance Considerations</h4>
+          <p>WARNING: selecting nodes by shape can be a very expensive operation, since it requires a shape engine to examine a potentially large number of nodes.</p>
+          <ul>
+            <li>
+              Target shapes that use node characteristics not usually indexed by RDF repositories can be especially expensive.
+              This includes selecting by URL pattern (e.g. see <a href="#target-namespace-instances">Namespace Instances</a> above).
+              by literal characteristic (e.g. see <a href="#target-all-langstrings">All langStrings</a> above),
+              by literal value length
+              (<a href="https://www.w3.org/TR/shacl/#MinLengthConstraintComponent">sh:minLength</a>, 
+              <a href="https://www.w3.org/TR/shacl/#MaxLengthConstraintComponent">sh:maxLength</a>), etc
+            </li>
+            <li>
+              Target shapes that use properties and objects to describe nodes can typically be executed faster,
+              using the indexes of the RDF repository.
+              This includes targeting <a href="#target-by-property-and-object">by property and object</a>,
+              <a href="#target-by-cardinality">by cardinality</a>,
+              <a href="#semantic-type-discrimination">"semantic type"</a>, etc.
+            </li>
+          </ul>
+          <p>In addition, the population size of the nodes to be examined has a great impact:</p>
+          <ul>
+            <li>Targeting by shape will be slow for "whole repository" validation, where potentiall every node needs to be examined.</li>
+            <li>In contrast, targeting by shape is feasible for validating the payload of a transaction, which may be significantly smaller than a whole repository.</li>
+          </ul>
+          <p>
+            Please check with your SHACL validation engine provider whether <code>NodeShape</code> targets can be calculated efficiently.
+            For example, the <a href="https://rdf4j.org/javadoc/latest/org/eclipse/rdf4j/sail/shacl/ShaclSail.html">RDF4J ShaclSail</a>
+            implements incremental validation of transactions and works efficiently for some typical data update scenarios.
+          </p>
+        </section>
+		  </section>
+		  
 		<section id="sparql-constraints-annotations">
 			<h2>Annotation Properties</h2>
 			<p>
