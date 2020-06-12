@@ -18,7 +18,14 @@
 						company:    "TopQuadrant, Inc.",
 						companyURL: "http://topquadrant.com/",
 						w3cid:      46500
-					}
+					},
+					{
+						name:       "Vladimir Alexiev",
+						url:        "https://github.com/VladimirAlexiev/my",
+						company:    "Ontotext Corp",
+						companyURL: "http://ontotext.com",
+            w3cid: 	    56618
+					}          
 				],
 				publishDate:  "2018-01-09",
 				wg:           "SHACL Community Group",
@@ -716,12 +723,76 @@ fragment PN_LOCAL_ESC: '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&amp;' | '\'' 
 				The test cases are not normative.
 			</p>
 		</section>
+
+    <section class="appendix normative" id="iana-considerations">
+      <h2>IANA Considerations</h2>
+
+      <p>This section has been submitted to the Internet Engineering Steering
+        Group (IESG) for review, approval, and registration with IANA.</p>
+
+      <h3 id="text-shaclc">text/shaclc</h3>
+      <dl>
+        <dt>Type name:</dt>
+        <dd>text</dd>
+        <dt>Subtype name:</dt>
+        <dd>shaclc</dd>
+        <dt>Required parameters:</dt>
+        <dd>None</dd>
+        <dt>Encoding considerations:</dt>
+        <dd>SHACL Compact Syntax (SHACLC) is a text language encoded in UTF-8.</dd>
+        <dt>Security considerations:</dt>
+        <dd>
+          <p>
+            Revealing the structure of an RDF graph can reveal information about the content of conformant data.
+            For instance, a schema with a predicate to describe cancer stage indicates that conforming graphs describe patients with cancer.
+          </p>
+          <p>
+            The process of testing a graph's conformance to a schema could draw significant system resources and be a vector for Denial of Service attacks.
+          </p>
+          <p>
+            <a href="https://www.w3.org/TR/turtle/#sec-mediaReg">RDF Turtle security considerations</a> about IRI spoofing may also apply here.
+          </p>
+        </dd>
+        <dt>Interoperability considerations:</dt>
+        <dd>Not Applicable</dd>
+        <dt>Published specification:</dt>
+        <dd><a href="https://w3c.github.io/shacl/shacl-compact-syntax/">This document</a></dd>
+        <dt>Applications that use this media type:</dt>
+        <dd>An implementations of SHACLC is part of the <a href="https://github.com/TopQuadrant/shacl">TopQuadrant SHACL API</a>
+        </dd>
+        <dt>Additional information:</dt>
+        <dd>
+          <dl>
+            <dt>Magic number(s):</dt>
+            SHACLC documents will likely have the words <code>PREFIX</code> or <code>BASE</code> (case sensitive) near the beginning of the document.
+            However, the same words may appear in Turtle and SPARQL documents.
+            <dd></dd>
+            <dt>File extension(s):</dt>
+            <dd>.shaclc</dd>
+            <dt>Macintosh file type code(s):</dt>
+            <dd>TEXT</dd>
+          </dl>
+        </dd>
+        <dt>Person &amp; email address to contact for further information:</dt>
+        <dd>Vladimir Alexiev &lt;vladimir.alexiev@ontotext.com&gt;</dd>
+        <dt>Intended usage:</dt>
+        <dd>Common</dd>
+        <dt>Restrictions on usage:</dt>
+        <dd>None</dd>
+        <dt>Author(s):</dt>
+        <dd>Holger Knublauch, TopQuadrant</dd>
+        <dt>Change controller:</dt>
+        <dd><a href="https://www.w3.org/community/shacl/">W3C SHACL Community Group</a>
+        </dd>
+      </dl>
+    </section>
 		
 		<section id="ack" class="appendix informative">
 			<h2>Acknowledgements</h2>
 			<p>
 				This document is heavily inspired by the <a href="http://shex.io/shex-semantics/#shexc">ShEx Compact Syntax</a>,
 				a version of which was provided as input to the RDF Data Shapes Working Group.
+        The IANA Considerations section has been adapted <a href="http://shex.io/shex-semantics/#iana-considerations">from the same document</a>.
 				The ShEx Compact Syntax was primarily developed by the following people:
 			</p>
 			<p>
