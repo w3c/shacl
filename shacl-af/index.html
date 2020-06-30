@@ -651,7 +651,8 @@ ex:USCitizenShape
         </p>
         <div class="syntax" data-syntax-rule="target-shape" id="syntax-target-shape">
           A <dfn data-lt="Shape-based target">shape-based target</dfn> is a <a>shape</a> (<a>node shape</a> or <a>property shape</a>)
-          that has incoming property <code>sh:shapeTarget</code>.
+          that is the object of a triple that has <code>sh:targetShape</code> as its predicate.
+          Conversely, the values of <code>sh:targetShape</code> are shapes.
         </div>
 
         <p>Here are some examples:</p>
@@ -702,12 +703,13 @@ ex:PartyShape a sh:NodeShape;
 					<div class="def-header">TEXTUAL DEFINITION</div>
 					<div class="def-text-body">
 						If triple <code>S sh:targetShape TS</code> is in the <a>shapes graph</a>
-						then the <a>target</a> nodes of <code>S</code> are all nodes (<a>subjects</a> or <a>objects</a>) in the <a>data graph</a>
+						then the <a>target</a> nodes of <code>S</code> are all <a>nodes</a> (<a>subjects</a> or <a>objects</a>) in the <a>data graph</a>
             that <a>conform</a> to <code>TS</code>.
 					</div>
 				</div>
       </section>
 
+      <p><em>The remainder of this section is informative.</em></p>
       <p>
         <strong>Warning regarding performance</strong>:
         selecting nodes by shape can be a very expensive operation, since it requires a shape engine to examine a potentially large number of nodes.</p>
