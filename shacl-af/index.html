@@ -294,6 +294,7 @@
 				<li>Added <a>orderBy expression</a>, <a>limit expression</a> and <a>offset expression</a></li>
 				<li>Added <a>minus expression</a></li>
 				<li>Added <a>SPARQL ASK expression</a> and <a>SPARQL SELECT expression</a></li>
+				<li>Fixed an example of sh:path expressions</li>
 			</ul>
 		</section>
 				
@@ -1202,7 +1203,7 @@ WHERE {
 <pre class="example-shapes" style="margin-top: 0">
 [  sh:path ex:firstName ] .
 
-[  sh:nodes ex:children ;
+[  sh:nodes [ sh:path ex:children ] ;
    sh:path rdfs:label ;
 ] .</pre>
 						</td>
