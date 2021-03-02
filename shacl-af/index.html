@@ -1085,6 +1085,27 @@ WHERE {
 						if <code>Eval(N, $this)</code> produces at least one <a>node</a>, and the list consisting of exactly the node <code>false</code> otherwise.
 					</div>
 				</div>
+				<p>
+					In the following example, <code>sh:exists</code> is used to test whether the current focus node has any value for an example property.
+                    This is comparable to the SPARQL expression on the right.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:exists [ sh:path ex:someProperty ]
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+{
+    BIND (EXISTS { $this ex:someProperty ?any } AS ?result)
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="node-expressions-if">
@@ -1106,6 +1127,30 @@ WHERE {
 						otherwise produce <code>Eval(ELSE, $this)</code> (or the empty list if ELSE is absent).
 					</div>
 				</div>
+				<p>
+					The following example produces the string node "married" if the focus node has a spouse, "not married" otherwise.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:if [ sh:exists [ sh:path ex:spouse ] ] ;
+    sh:then "married" ;
+    sh:else "not married" ;
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+{
+    BIND (IF(EXISTS { $this ex:spouse ?any }, 
+            "married", 
+            "not married") AS ?result)
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="node-expressions-filter-shape">
@@ -1124,6 +1169,20 @@ WHERE {
 						each <a>node</a> <code>n</code> produced by <code>Eval(N, $this)</code> where <code>n</code> <a>conforms</a> to <code>S</code>.
 					</div>
 				</div>
+                <p>
+                    The following example returns all values of <code>ex:child</code> that conform to the given SHACL shape.
+                    In order to conform to the shape, the child must have "male" as one of its values for <code>ex:gender</code>.
+                </p>
+<pre class="example-shapes">
+[
+    sh:nodes [ sh:path ex:child ] ;
+    sh:filterShape [
+        sh:property [
+            sh:path ex:gender ;
+            sh:hasValue "male" ;
+        ] ;
+    ] ;
+]</pre>
 			</section>
 
 			<section id="node-expressions-function">
@@ -1297,6 +1356,31 @@ WHERE {
 						<code>Eval($expr, $this)</code> produces the list of <a>nodes</a> that are in <code>Eval(N, $this)</code> but not in <code>Eval(M, $this)</code>.
 					</div>
 				</div>
+				<p>
+					In the following example, <code>sh:minus</code> returns all values of the property <code>ex:children</code>
+                    except those that are also values of <code>ex:sons</code>.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:nodes [ sh:path ex:children ] ;
+    sh:minus [ sh:path ex:sons ] ;
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+{
+    $this ex:children ?result .
+    MINUS {
+        $this ex:sons ?result .
+    }
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="distinct">
@@ -1314,6 +1398,34 @@ WHERE {
 						duplicate nodes.
 					</div>
 				</div>
+				<p>
+					The following example returns all values of <code>ex:customer</code> and <code>ex:client</code> but without duplicates.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:distinct [
+        sh:union (
+            [ sh:path ex:customer ] ;
+            [ sh:path ex:client ] ;
+        )
+    ]
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT DISTINCT (?c AS ?result)
+WHERE {
+    { $this ex:customer ?c }
+    UNION
+    { $this ex:client ?c }
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="count">
@@ -1331,6 +1443,27 @@ WHERE {
 						representing the size of the input list produced by <code>Eval(N, $this)</code>.
 					</div>
 				</div>
+				<p>
+					The following example returns the number of values of <code>ex:customer</code>.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:count [ sh:path ex:customer ]
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT (COUNT(?c) AS ?result)
+WHERE {
+    $this ex:customer ?c .
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="min">
@@ -1348,6 +1481,27 @@ WHERE {
 						or the list consisting of exactly one node that is the minimum input node as defined by <a href="https://www.w3.org/TR/sparql11-query/#defn_aggMin">SPARQL MIN</a>.
 					</div>
 				</div>
+				<p>
+					The following example returns the minimum of all values of <code>ex:turnOver</code> of all values of <code>ex:client</code> at the focus node.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:min [ sh:path ( ex:client ex:turnOver ) ]
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT (MIN(?t) AS ?result)
+WHERE {
+    $this ex:client/ex:turnOver ?t .
+}
+</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="max">
@@ -1411,6 +1565,35 @@ WHERE {
 					Tip: in order to control exactly how individual values get rendered, wrap the input node expression with a <a>function expression</a> that
 					produces a string literal.
 				</p>
+				<p>
+					The following example returns a comma-separated list of the labels of the values of <code>ex:child</code> at the focus node, ordered by their individual labels.
+                    Here we assume each child has at most one label, to make the result predictable.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:groupConcat [
+        sh:path rdfs:label ;
+        sh:nodes [ 
+            sh:nodes [ sh:path ex:child ] ;
+            sh:orderBy [ sh:path rdfs:label ] ;
+        ] ;
+    ] ;
+    sh:separator ", " ;
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT (GROUP_CONCAT(?label; separator=", ") AS ?result)
+WHERE {
+    $this ex:child ?child .
+    ?child rdfs:label ?label .
+} ORDER BY ?label</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="orderBy">
@@ -1434,6 +1617,31 @@ WHERE {
 						If <code>sh:desc</code> is <code>true</code> for the expression, then the order is descending, otherwise ascending. 
 					</div>
 				</div>
+				<p>
+					The following example returns the list of values of <code>ex:child</code> at the focus node, ordered by their individual labels.
+                    Here we assume each child has at most one label, to make the result predictable.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:nodes [ sh:path ex:child ] ;
+    sh:orderBy [ sh:path rdfs:label ] ;
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT DISTINCT ?child
+WHERE {
+    $this ex:child ?child .
+    OPTIONAL {
+        ?child rdfs:label ?label .
+    }
+} ORDER BY ?label</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="limit">
@@ -1452,6 +1660,27 @@ WHERE {
 						<code>Eval($expr, $this)</code> produces the list consisting of exactly the first <code>L</code> results of <code>Eval(N, $this)</code>.
 					</div>
 				</div>
+				<p>
+					The following example returns at most two values of <code>ex:parent</code> at the focus node.
+				</p>
+				<table style="width:100%; border-collapse: collapse;">
+					<tr>
+						<td style="width: 50%; padding: 0 4px 0 0">
+<pre class="example-shapes" style="margin-top: 0">
+[
+    sh:limit 2 ;
+    sh:nodes [ sh:path ex:parent ] ;
+] .</pre>
+						</td>
+						<td style="width: 50%; padding: 0 0 0 4px">
+<pre class="example-sparql" style="margin-top: 0">
+SELECT ?parent
+WHERE {
+    $this ex:parent ?parent .
+} LIMIT 2</pre>
+						</td>
+					</tr>
+				</table>
 			</section>
 
 			<section id="offset">
@@ -1495,7 +1724,14 @@ WHERE {
 						produced by <code>Eval(N, $this)</code> as pre-bound variable <code>$this</code>. 
 					</div>
 				</div>
-			</section>
+                <p>
+                    The following example produces <code>true</code> if the focus node has the given <code>rdf:type</code>.
+                </p>
+<pre class="example-shapes">
+[
+    sh:ask "ASK { $this a &lt;http://example.org/ns#Person&gt; }"
+] .</pre>
+            </section>
 
 			<section id="select">
 				<h3>SPARQL SELECT Expressions</h3>
@@ -1519,6 +1755,29 @@ WHERE {
 						executed for each node produced by <code>Eval(N, $this)</code> as pre-bound variable <code>$this</code>. 
 					</div>
 				</div>
+                <p>
+                    The following example is an excerpt of a Turtle file declaring a SPARQL SELECT expression using namespace prefixes.
+                </p>
+<pre class="example-shapes">
+&lt;http://example.org/ns&gt;
+    a owl:Ontology ;
+    sh:declare [
+        a sh:PrefixDeclaration ;
+        sh:prefix "ex" ;
+        sh:namespace "http://example.org/ns#"^^xsd:anyURI ;
+    ] .
+
+[
+    sh:prefixes &lt;http://example.org/ns&gt; ;
+    sh:select """
+        SELECT DISTINCT ?client
+        WHERE {
+            $this ex:client ?client .
+            ?client ex:address/ex:country ?country .
+            ?country ex:memberOf ex:WHO .
+        }
+    """ ;
+] .</pre>
 			</section>
 		</section>
 		
