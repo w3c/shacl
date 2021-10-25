@@ -12,8 +12,24 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+qb:ComponentPropertyRuleShape
+  a sh:NodeShape ;
+  rdfs:comment "A SHACL rule that can be used to infer additional triples that copies all values of the sub-properties of qb:componentProperty into qb:componentProperty itself. This is needed because many constraints here only reference qb:componentProperty." ;
+  sh:rule [
+      a sh:SPARQLRule ;
+      sh:construct """CONSTRUCT {
+    ?subject qb:componentProperty ?object .
+}
+WHERE {
+    ?subject qb:attribute|qb:dimension|qb:measure|qb:measureDimension ?object .
+}""" ;
+      sh:order 0 ;
+      sh:prefixes <http://topbraid.org/datacube> ;
+    ] ;
+  sh:targetNode sh:this ;
+.
 qb:DataSetShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Data set shape" ;
   sh:property [
       sh:path qb:structure ;
@@ -25,7 +41,7 @@ qb:DataSetShape
   sh:targetClass qb:DataSet ;
 .
 qb:DataStructureDefinitionShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Data structure definition shape" ;
   sh:property [
       sh:path qb:component ;
@@ -56,7 +72,7 @@ WHERE {
   sh:targetClass qb:DataStructureDefinition ;
 .
 qb:DimensionPropertyShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Dimension property shape" ;
   sh:node [
       rdfs:comment "IC-5: Concept dimensions have code lists" ;
@@ -83,7 +99,7 @@ qb:DimensionPropertyShape
   sh:targetClass qb:DimensionProperty ;
 .
 qb:ObservationShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Observation shape" ;
   sh:property [
       sh:path qb:dataSet ;
@@ -111,11 +127,11 @@ WHERE {
 WHERE {
 	{
 		# For each pair of observations test if all the dimension values are the same
-		SELECT (MIN(?equal) AS ?allEqual)
+		SELECT $this (MIN(?equal) AS ?allEqual)
 		WHERE {
 			$this qb:dataSet ?dataset .
 			?obs2 qb:dataSet ?dataset .
-			FILTER (?obs1 != ?obs2)
+			FILTER ($this != ?obs2)
 			?dataset qb:structure/qb:component/qb:componentProperty ?dim .
 			?dim a qb:DimensionProperty .
 			$this ?dim ?value1 .
@@ -197,11 +213,11 @@ WHERE {
 WHERE {
 	{
 		# Count number of other measures found at each point 
-		SELECT ?numMeasures (COUNT(?obs2) AS ?count)
+		SELECT $this ?numMeasures (COUNT(?obs2) AS ?count)
 		WHERE {
 			{
 				# Find the DSDs and check how many measures they have
-				SELECT ?dsd (COUNT(?m) AS ?numMeasures)
+				SELECT $this ?dsd (COUNT(?m) AS ?numMeasures)
 				WHERE {
 					?dsd qb:component/qb:componentProperty ?m.
 					?m a qb:MeasureProperty .
@@ -318,7 +334,7 @@ WHERE {
   sh:targetClass qb:Observation ;
 .
 qb:SliceKeyShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Slice key shape" ;
   sh:sparql [
       rdfs:comment "IC-7. Slice Keys must be declared" ;
@@ -343,7 +359,7 @@ WHERE {
   sh:targetClass qb:SliceKey ;
 .
 qb:SliceShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:label "Slice shape" ;
   sh:property [
       sh:path qb:sliceStructure ;
@@ -365,7 +381,7 @@ WHERE {
   sh:targetClass qb:Slice ;
 .
 qb:hasZeroOrMore
-  rdf:type sh:SPARQLFunction ;
+  a sh:SPARQLFunction ;
   rdfs:comment "A helper function that simulates a property* path in SPARQL, where the property is a variable. This is needed as a helper for the constraints IC-20 and IC-21. The function takes a subject, predicate and object (all of which must be bound) and returns true if the SPARQL expression ?subject ?predicate* ?object has a match." ;
   rdfs:label "has zero or more" ;
   sh:ask """ASK {
@@ -397,7 +413,7 @@ qb:hasZeroOrMore
   sh:returnType xsd:boolean ;
 .
 <http://topbraid.org/datacube>
-  rdf:type owl:Ontology ;
+  a owl:Ontology ;
   rdfs:comment "Implements the integrity constraints defined by section 11.1 of the Data Cube specification. Most of the constraints work in standard SHACL-SPARQL, but two constraints require a SHACL function (from SHACL Advanced Features) to recursively walk a dynamically computed property path. An alternative implementation of these constraints could be produced without a helper function based on SHACL-JS." ;
   rdfs:label "SHACL shapes for RDF Data Cube Vocabulary" ;
   rdfs:seeAlso <https://www.w3.org/TR/vocab-data-cube/#wf-rules> ;
@@ -406,17 +422,18 @@ qb:hasZeroOrMore
   owl:imports <http://www.w3.org/2004/02/skos/core> ;
   owl:versionInfo "Created with TopBraid Composer. This is currently completely untested." ;
   sh:declare [
-      rdf:type sh:PrefixDeclaration ;
+      a sh:PrefixDeclaration ;
       sh:namespace "http://purl.org/linked-data/cube#"^^xsd:anyURI ;
       sh:prefix "qb" ;
     ] ;
+  sh:entailment sh:Rules ;
 .
 skos:memberListShape
-  rdf:type sh:NodeShape ;
+  a sh:NodeShape ;
   rdfs:comment "A shape that applies to all subjects of skos:memberList triples." ;
   rdfs:label "member list shape" ;
   sh:rule [
-      rdf:type sh:SPARQLRule ;
+      a sh:SPARQLRule ;
       rdfs:comment "Materializes any skos:member triples from skos:memberList values, if needed." ;
       sh:construct """CONSTRUCT {
     $this skos:member ?member .
