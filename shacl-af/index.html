@@ -295,6 +295,7 @@
 				<li>Added <a>minus expression</a></li>
 				<li>Added <a>SPARQL ASK expression</a> and <a>SPARQL SELECT expression</a></li>
 				<li>Fixed an example of sh:path expressions</li>
+                <li>Fixed the example of sh:SPARQLTargetType</li>
 			</ul>
 		</section>
 				
@@ -611,8 +612,8 @@ ex:PeopleBornInCountryTarget
 		sh:class ex:Country ;
 		sh:nodeKind sh:IRI ;
 	] ;
-	sh:prefixes ex: ;
 	sh:select """
+		PREFIX ex: &lt;http://example.com/ns#&gt;
 		SELECT ?this
 		WHERE {
 			?this a ex:Person .
@@ -626,7 +627,7 @@ ex:PeopleBornInCountryTarget
 ex:GermanCitizenShape
 	a sh:NodeShape ;
 	sh:target [
-		a ex:BornInCountryTarget ;
+		a ex:PeopleBornInCountryTarget ;
 		ex:country ex:Germany ;
 	] ;
 	...
@@ -634,7 +635,7 @@ ex:GermanCitizenShape
 ex:USCitizenShape
 	a sh:NodeShape ;
 	sh:target [
-		a ex:BornInCountryTarget ;
+		a ex:PeopleBornInCountryTarget ;
 		ex:country ex:USA ;
 	] ;
 	...</pre>
