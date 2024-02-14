@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Shapes Constraint Language (SHACL)</title>
+		<title>SHACL Core</title>
 		<meta charset="utf-8">
-		<script src="https://www.w3.org/Tools/respec/respec-w3c-common" async class="remove"></script>
+		<script src="https://www.w3.org/Tools/respec/respec-w3c" class="remove" defer></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 		<script class="remove">
 		
 			var prepareSyntaxRules = function() {
@@ -31,16 +32,13 @@
 			};
 		
 			var respecConfig = {
-				edDraftURI: "https://w3c.github.io/data-shapes/shacl/",
+				group: 'shacl',
+				edDraftURI: "https://w3c.github.io/shacl/shacl-core/",
 				issueBase: "http://www.w3.org/2014/data-shapes/track/issues/",
-				specStatus: "ED",
-				crEnd: "2017-05-09",
-				// publishDate: "2017-04-11",
+				specStatus: "CG-DRAFT",
 				implementationReportURI: "http://w3c.github.io/data-shapes/data-shapes-test-suite/",
 				preProcess : [ prepareSyntaxRules, prepareValidators ],
-				previousPublishDate: "2017-03-03",
-				previousMaturity: "WD",
-				shortName:  "shacl",
+				shortName:  "shacl-core",
 				editors: [
 					{
 						name:       "Holger Knublauch",
@@ -49,6 +47,9 @@
 						companyURL: "http://topquadrant.com/",
 						w3cid:      46500
 					},
+					// TODO: Decide on co-editors
+				],
+				formerEditors: [
 					{
 						name:       "Dimitris Kontokostas",
 						url:        "http://Kontokostas.com",
@@ -63,11 +64,11 @@
 						data: [
 							{
 								value: "GitHub",
-								href: "https://github.com/w3c/data-shapes"
+								href: "https://github.com/w3c/shacl"
 							},
 							{
 								value: "Issues",
-								href: "https://github.com/w3c/data-shapes/issues"								
+								href: "https://github.com/w3c/shacl/issues"								
 							}
 						]
 					},
@@ -82,9 +83,9 @@
 					}
 				],
 				errata:       "https://www.w3.org/2017/shacl/errata",
-				wg:           "RDF Data Shapes Working Group",
-				wgURI:        "https://www.w3.org/2014/data-shapes/",
-				wgPublicList: "public-rdf-shapes",
+				wg:           "SHACL Community Group",
+				wgURI:        "https://www.w3.org/community/shacl/",
+				wgPublicList: "public-shacl",
 				wgPatentURI:  "https://www.w3.org/2004/01/pp-impl/73865/status",
 				noHighlightCSS: true
 			};
