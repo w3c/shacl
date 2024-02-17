@@ -1,4 +1,4 @@
-# shacl
+# SHACL
 SHACL Community Group
 
 SHACL Documents:
