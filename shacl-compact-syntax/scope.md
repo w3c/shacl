@@ -11,7 +11,7 @@ This document outlines the scope of new features to be supported.
 Syntactic additions will be required for SHACL-C to support the following:
 
  - [RDF datasets](https://github.com/w3c/shacl/issues/22)
- - [RDF 1.2 (in particular embedded triples)](https://github.com/w3c/shacl/issues/23)
+ - [RDF 1.2 triple terms and occurrences](https://github.com/w3c/shacl/issues/23)
  - [RDF 1.2 text direction](https://github.com/w3c/shacl/issues/24)
 
 Note that this should be done *after* these features have been supported by the core SHACL spec.
