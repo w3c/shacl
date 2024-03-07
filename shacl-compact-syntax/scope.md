@@ -1,4 +1,4 @@
-# Shacl Compact Syntax 1.2 Scope Document
+# SHACL Compact (SHACL-C) Syntax 1.2 Scope Document
 
 As SHACL needs to be updated to support RDF 1.2, there is an opportunity to promote SHACL-C from a CG to WG specification, whilst:
  - Upgrading the SHACL-C spec to support RDF 1.2 features in alignment with upgrades to the other SHACL specs, and
