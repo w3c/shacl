@@ -41,7 +41,6 @@ There is also work that can be done to make the test suite more robust such as:
  - [shaclc->shacl outputs `;` instead of `.` TopQuadrant/shacl#91](https://github.com/TopQuadrant/shacl/issues/91) (test case)
  - [shacl conversion: malformed lists TopQuadrant/shacl#92](https://github.com/TopQuadrant/shacl/issues/92) (test case)
 
-
 ## Implementations
 The current SHACL-C implementations are
  - https://jena.apache.org/documentation/shacl/#shacl-compact-syntax
