@@ -1,0 +1,1284 @@
+grammar com.osthus.shapes.shaclc.SHACLC hidden(PASS, COMMENT)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+generate sHACLC "http://www.osthus.com/shapes/shaclc/SHACLC"
+
+ShaclDoc:
+  KW_LIBRARY iri=IRIREF
+  (KW_VERSION versionIri=IRIREF)?
+  directives+=Directive*
+  shapes+=(NodeShape | ShapeClass | PropertyShape | RuleShape | TargetShape | FunctionShape)*;
+
+Directive:
+  baseDecl=BaseDecl | importsDecl=ImportsDecl | prefixDecl=PrefixDecl;
+
+BaseDecl:
+  KW_BASE iri=IRIREF;
+
+ImportsDecl:
+  KW_IMPORTS iri=IRIREF;
+
+PrefixDecl:
+  KW_PREFIX prefix=PNAME_NS iri=IRIREF;
+
+ShapeClass:
+  KW_SHAPE_CLASS iri=Iri ("." | "{" body=NodeShapeBody "}");
+
+NodeShape:
+  KW_SHAPE iri=Iri (targets+=Target)* ("." | "{" body=NodeShapeBody "}");
+
+PropertyShape:
+  KW_PROPERTY iri=Iri ("." | "{" body=PropertyShapeBody "}");
+
+
+RuleShape:
+  KW_RULE iri=Iri ("." |  "{" body=RuleBody "}");
+
+TargetShape:
+  KW_TARGET iri=Iri ("." |  decl=TargetDeclaration "{" body=TargetBody "}" );
+
+FunctionShape:
+  KW_FUNCTION iri=Iri ("." | decl=FunctionDeclaration "{" body=FunctionBody "}");
+
+Target:
+  TargetClasses
+  | TargetNodes
+  | TargetTargets
+  | TargetSubjectsOf
+  | TargetObjectsOf
+  | TargetSelect;
+
+TargetClasses:
+  OP_TARGETS classes+=Iri (',' classes+=Iri)*;
+
+TargetSubjectsOf:
+  OP_TARGETS_SUBJECTS properties+=Iri (',' properties+=Iri)*;
+
+TargetObjectsOf:
+  OP_TARGETS_OBJECTS properties+=Iri (',' properties+=Iri)*;
+
+TargetSelect:
+  OP_TARGETS select=SelectQuery;
+
+TargetNodes:
+  OP_TARGETS nodes=Array;
+
+TargetTargets:
+  OP_TARGETS targets+=TargetCall (',' targets+=TargetCall)*;
+
+TargetCall:
+  target=TargetRef parameters=ParameterAssignments?;
+
+
+RuleBody:
+  {RuleBody}
+  sparql=ConstructQuery
+  (KW_CONDITION condition=NodeShapeOrRef)?
+  (KW_PRIORITY order=INTEGER)?
+  ;
+
+TargetBody:
+  (KW_LABEL lbl=Str)?
+  select=SelectQuery
+  ;
+
+TargetDeclaration:  '(' formalParameters+=ParameterDeclaration (',' formalParameters+=ParameterDeclaration)* ')';
+
+FunctionDeclaration:  '(' formalParameters+=ParameterDeclaration (',' formalParameters+=ParameterDeclaration)* ')'
+  (KW_RETURNS returnType=Iri)?;
+
+FunctionBody:
+  select=SelectQuery
+  ;
+
+ParameterDeclaration:
+  optional?=KW_OPTIONAL? KW_PARAMETER?
+  param=Iri
+  valueKind=NodeKind?
+  valueType=Iri?
+  (KW_ORDER order=INTEGER)?;
+
+ParameterAssignment:
+  param=Iri value=IriOrLiteral;
+
+ParameterAssignments:
+  '(' assignments+=ParameterAssignment (',' assignments+=ParameterAssignment)* ')';
+
+SparqlConstraint:
+  select=SelectQuery | ask=AskQuery;
+
+SelectQuery:
+  select=SelectClause datasets+=DatasetClause* where=WhereClause modifier=SolutionModifier;
+
+DescribeQuery:
+  SKW_DESCRIBE (varOrIris+=VarOrIri+ | all?='*') datasets+=DatasetClause* where=WhereClause modifier=SolutionModifier;
+
+SelectClause:
+  SKW_SELECT (distinct?=SKW_DISTINCT | reduced?=SKW_REDUCED)?
+  (selects+=SelectItem+
+  | all?='*');
+
+SelectItem:
+  variable=Variable
+  | '(' expr=Expression SKW_AS variable=Variable ')';
+
+AskQuery:
+  SKW_ASK datasets+=DatasetClause* where=WhereClause;
+
+DatasetClause:
+  SKW_FROM (graph=IRIREF | named?=SKW_NAMED graph=IRIREF);
+
+WhereClause:
+  SKW_WHERE? pattern=GroupGraphPattern;
+
+SolutionModifier:
+  {SolutionModifier} groupBy=GroupClause? having=HavingClause? orderBy=OrderClause? ((limit=LimitClause
+  offset=OffsetClause?) | (offset=OffsetClause limit=LimitClause?))?;
+
+ConstructQuery:
+  SKW_CONSTRUCT construct=ConstructTemplate datasets+=DatasetClause* where=WhereClause modifier=SolutionModifier;
+
+ConstructTemplate:
+  {ConstructTemplate} '{' triples+=TriplesSameSubject ('.' triples+=TriplesSameSubject?)* '}';
+
+TriplesSameSubject:
+  varOrTerm=VarOrTerm pListNotEmpty=PropertyListNotEmpty
+  | node=TriplesNode pList=PropertyList;
+
+TriplesSameSubjectPath:
+  varOrTerm=VarOrTerm pListNotEmpty=PropertyListPathNotEmpty
+  | node=TriplesNodePath pList=PropertyListPath;
+
+OrderClause:
+  SKW_ORDER SKW_BY conditions+=OrderCondition+;
+
+OrderCondition:
+  ((asc?=SKW_ASC | desc?=SKW_DESC) expr=BrackettedExpression)
+  | (constraint=Constraint | variable=Variable);
+
+ValuesClause:
+  {ValuesClause} (SKW_VALUES data=DataBlock)?;
+
+DataBlock:
+  DataBlockOneVar
+  | DataBlockFull;
+
+DataBlockOneVar:
+  variable=Variable '{' values+=DataBlockValue* '}';
+
+DataBlockFull:
+  {DataBlockFull} '(' variables+=Variable* ')' '{' dataBlockValues+=DataBlockValues* '}';
+
+DataBlockValue:
+  iri=Iri | literal=Literal | undef?='UNDEF';
+
+DataBlockValues:
+  {DataBlockValues} ('(' values+=DataBlockValue* ')');
+
+GroupClause:
+  SKW_GROUP SKW_BY conditions+=GroupCondition+;
+
+GroupCondition:
+  biCall=BuiltInCall
+  | fnCall=FunctionCall
+  | '(' expr=Expression (SKW_AS variable=Variable)? ')'
+  | variable=Variable;
+
+HavingClause:
+  SKW_HAVING conditions+=HavingCondition;
+
+HavingCondition:
+  constraint=Constraint;
+
+Constraint:
+  expr=BrackettedExpression | biCall=BuiltInCall | fnCall=FunctionCall;
+
+GroupGraphPattern:
+  {GroupGraphPattern} '{' (subSelect=SubSelect | triples=TriplesBlock? parts+=GraphPatternPart*) '}';
+
+GraphPatternPart:
+  notTriples=GraphPatternNotTriples '.'? triples=TriplesBlock?;
+
+SubSelect:
+  select=SelectClause where=WhereClause modifier=SolutionModifier values=ValuesClause;
+
+GraphPatternNotTriples:
+  union=UnionGraphPattern
+  | optional=OptionalGraphPattern
+  | minus=MinusGraphPattern
+  | graph=GraphGraphPattern
+  //	| service=ServiceGraphPattern
+  | filter=Filter
+  | bind=Bind
+  | inlineData=InlineData;
+
+Bind:
+  SKW_BIND '(' expr=Expression SKW_AS variable=Variable ')';
+
+InlineData:
+  SKW_VALUES data=DataBlock;
+
+MinusGraphPattern:
+  SKW_MINUS pattern=GroupGraphPattern;
+
+OptionalGraphPattern:
+  SKW_OPTIONAL pattern=GroupGraphPattern;
+
+GraphGraphPattern:
+  SKW_GRAPH varOrIri=VarOrIri pattern=GroupGraphPattern;
+
+UnionGraphPattern:
+  pattern+=GroupGraphPattern (SKW_UNION pattern+=GroupGraphPattern)*;
+
+ServiceGraphPattern:
+  SKW_SERVICE silent?=SKW_SILENT? varOrIri=VarOrIri pattern=GroupGraphPattern;
+
+TriplesBlock:
+  triples+=TriplesSameSubjectPath ('.' triples+=TriplesSameSubjectPath?)*;
+
+Filter:
+  SKW_FILTER constraint=Constraint;
+
+PropertyListPathNotEmpty:
+  poListPath=PathObjectListPath (';' poList+=PathObjectList?)*;
+
+PathOrVariable:
+  path=Path | variable=Variable;
+
+PropertyListPath:
+  {PropertyListPath}
+  notEmpty=PropertyListPathNotEmpty?;
+
+PathObjectList:
+  pathOrVar=PathOrVariable objList=ObjectList;
+
+PathObjectListPath:
+  pathOrVar=PathOrVariable objListPath=ObjectListPath;
+
+PropertyListNotEmpty:
+  voList+=VerbObjectList (';' voList+=VerbObjectList?)*;
+
+PropertyList:
+  {PropertyList}
+  notEmpty=PropertyListNotEmpty?;
+
+VerbObjectList:
+  verb=Verb objList=ObjectList;
+
+Verb:
+  varOrIri=VarOrIri
+  | rdftype?='a';
+
+ObjectList:
+  objects+=Object (',' objects+=Object)*;
+
+ObjectListPath:
+  objects+=ObjectPath (',' objects+=ObjectPath)*;
+
+Object:
+  node=GraphNode;
+
+ObjectPath:
+  node=GraphNodePath;
+
+Collection:
+  '(' nodes+=GraphNode+ ')';
+
+CollectionPath:
+  '(' nodes+=GraphNodePath+ ')';
+
+GraphNode:
+  varOrTerm=VarOrTerm
+  | node=TriplesNode;
+
+GraphNodePath:
+  varOrTerm=VarOrTerm
+  | node=TriplesNodePath;
+
+TriplesNode:
+  coll=Collection
+  | bnodePList=BlankNodePropertyList;
+
+TriplesNodePath:
+  coll=CollectionPath
+  | bnodePList=BlankNodePropertyListPath;
+
+BlankNodePropertyList:
+  '[' pList=PropertyListNotEmpty ']';
+
+BlankNodePropertyListPath:
+  '[' pList=PropertyListPathNotEmpty ']';
+
+VarOrTerm:
+  variable=Variable
+  | term=GraphTerm;
+
+GraphTerm:
+  iri=Iri
+  | literal=RdfLiteral
+  | literal=NumericLiteral
+  | literal=BooleanLiteral
+  | bnode=BlankNode
+  | nil?='(' ')';
+
+BuiltInCall:
+  fn=FN_STR '(' expr+=Expression ')'
+  | fn=FN_LANG '(' expr+=Expression ')'
+  | fn=FN_LANGMATCHES '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_DATATYPE '(' expr+=Expression ')'
+  | fn=FN_BOUND '(' variable=Variable ')'
+  | fn=FN_IRI '(' expr+=Expression ')'
+  | fn=FN_URI '(' expr+=Expression ')'
+  | fn=FN_BNODE '(' expr+=Expression? ')'
+  | fn=FN_RAND '(' expr+=Expression ')'
+  | fn=FN_CEIL '(' expr+=Expression ')'
+  | fn=FN_FLOOR '(' expr+=Expression ')'
+  | fn=FN_ROUND '(' expr+=Expression ')'
+  | fn=FN_CONCAT '(' expr+=Expression (',' expr+=Expression)* ')'
+  | fn=FN_SUBSTR '(' expr+=Expression ',' expr+=Expression (',' expr+=Expression)? ')'
+  | fn=FN_STRLEN '(' expr+=Expression ')'
+  | fn=FN_REPLACE '(' expr+=Expression ',' expr+=Expression ',' expr+=Expression (',' expr+=Expression)? ')'
+  | fn=FN_UCASE '(' expr+=Expression ')'
+  | fn=FN_LCASE '(' expr+=Expression ')'
+  | fn=FN_ENCODE_FOR_URI '(' expr+=Expression ')'
+  | fn=FN_CONTAINS '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRSTARTS '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRENDS '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRBEFORE '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRAFTER '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_YEAR '(' expr+=Expression ')'
+  | fn=FN_MONTH '(' expr+=Expression ')'
+  | fn=FN_DAY '(' expr+=Expression ')'
+  | fn=FN_HOURS '(' expr+=Expression ')'
+  | fn=FN_MINUTES '(' expr+=Expression ')'
+  | fn=FN_SECONDS '(' expr+=Expression ')'
+  | fn=FN_TIMEZONE '(' expr+=Expression ')'
+  | fn=FN_TZ '(' expr+=Expression ')'
+  | fn=FN_NOW '(' ')'
+  | fn=FN_UUID '(' ')'
+  | fn=FN_STRUUID '(' ')'
+  | fn=FN_MD5 '(' expr+=Expression ')'
+  | fn=FN_SHA1 '(' expr+=Expression ')'
+  | fn=FN_SHA256 '(' expr+=Expression ')'
+  | fn=FN_SHA384 '(' expr+=Expression ')'
+  | fn=FN_SHA512 '(' expr+=Expression ')'
+  | fn=FN_COALESCE '(' expr+=Expression (',' expr+=Expression)* ')'
+  | fn=FN_IF '(' expr+=Expression ',' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRLANG '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_STRDT '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_SAMETERM '(' expr+=Expression ',' expr+=Expression ')'
+  | fn=FN_ISIRI '(' expr+=Expression ')'
+  | fn=FN_ISURI '(' expr+=Expression ')'
+  | fn=FN_ISBLANK '(' expr+=Expression ')'
+  | fn=FN_ISLITERAL '(' expr+=Expression ')'
+  | fn=FN_REGEXP '(' expr+=Expression ',' expr+=Expression (',' expr+=Expression)? ')'
+  | exist=ExistsFunc
+  | notExist=NotExistsFunc
+  | aggregate=Aggregate;
+
+ExistsFunc:
+  SKW_EXISTS pattern=GroupGraphPattern;
+
+NotExistsFunc:
+  SKW_NOT SKW_EXISTS pattern=GroupGraphPattern;
+
+Aggregate:
+  fn=FN_COUNT '(' distinct?=SKW_DISTINCT? (all?='*' | expr=Expression) ')'
+  | fn=FN_SUM '(' distinct?=SKW_DISTINCT? expr=Expression ')'
+  | fn=FN_MIN '(' distinct?=SKW_DISTINCT? expr=Expression ')'
+  | fn=FN_MAX '(' distinct?=SKW_DISTINCT? expr=Expression ')'
+  | fn=FN_SAMPLE '(' distinct?=SKW_DISTINCT? expr=Expression ')'
+  | fn=FN_AVG '(' distinct?=SKW_DISTINCT? expr=Expression ')'
+  | fn=FN_GROUP_CONCAT '(' distinct?=SKW_DISTINCT? expr=Expression (';' FN_SEPARATOR '=' sep=Str)? ')';
+
+Expression:
+  expr=ConditionalOrExpression;
+
+ConditionalOrExpression:
+  expr+=ConditionalAndExpression ('||' expr+=ConditionalAndExpression)*;
+
+ConditionalAndExpression:
+  expr+=ValueLogical ('&&' expr+=ValueLogical)*;
+
+ValueLogical:
+  expr=RelationalExpression;
+
+RelationalExpression:
+  expr+=NumericExpression
+  (op='=' expr+=NumericExpression
+  | op='!=' expr+=NumericExpression
+  | op='<' expr+=NumericExpression
+  | op='>' expr+=NumericExpression
+  | op='<=' expr+=NumericExpression
+  | op='>=' expr+=NumericExpression
+  | notIn?=SKW_NOT SKW_IN exprList=ExpressionList
+  | in?=SKW_IN exprList=ExpressionList)?;
+
+ExpressionList:
+  {ExpressionList} '(' expr+=Expression? (',' expr+=Expression)* ')';
+
+NumericExpression:
+  expr=AdditiveExpression;
+
+AdditiveExpression:
+  expr=MultiplicativeExpression terms+=AdditiveTerm*;
+
+AdditiveTerm:
+  op='+' expr=MultiplicativeExpression
+  | op='-' expr=MultiplicativeExpression
+  | num=NumericLiteral terms+=MultiplicativeTerm*;
+
+MultiplicativeExpression:
+  expr=UnaryExpression terms+=MultiplicativeTerm*;
+
+MultiplicativeTerm:
+  op+='*' expr=UnaryExpression
+  | op+='/' expr=UnaryExpression;
+
+UnaryExpression:
+  op='!' expr=PrimaryExpression
+  | op='+' expr=PrimaryExpression
+  | op='-' expr=PrimaryExpression
+  | expr=PrimaryExpression;
+
+PrimaryExpression:
+  expr=BrackettedExpression
+  | biCall=BuiltInCall
+  | iriOrFunction=IriOrFunction
+  | literal=Literal
+  | variable=Variable;
+
+BrackettedExpression:
+  '(' expr=Expression ')';
+
+IriOrFunction:
+  iri=Iri argList=ArgList?;
+
+FunctionCall:
+  iri=Iri argList=ArgList;
+
+ArgList:
+  {ArgList} '(' distinct?=SKW_DISTINCT? args+=Expression? (',' args+=Expression)* ')';
+
+VarOrIri:
+  variable=Variable
+  | iri=Iri;
+
+LimitClause:
+  SKW_LIMIT value=INTEGER;
+
+OffsetClause:
+  SKW_OFFSET value=INTEGER;
+
+RuleBodyOrRef:
+  "{" body=RuleBody "}"
+  | ref=RuleRef;
+
+NodeConstraint:
+   TypeConstraint
+  | HasValueConstraint
+  | InConstraint
+  | MinExclusiveConstraint
+  | MinInclusiveConstraint
+  | MaxExclusiveConstraint
+  | MaxInclusiveConstraint
+  | MinLengthConstraint
+  | MaxLengthConstraint
+  | PatternConstraint
+  | LessThanConstraint
+  | LessThanOrEqualConstraint
+  | NameAnnotation
+  | DescriptionAnnotation
+  ;
+
+
+
+PropertyConstraint:
+  HasValueConstraint
+  | InConstraint
+  | MinExclusiveConstraint
+  | MinInclusiveConstraint
+  | MaxExclusiveConstraint
+  | MaxInclusiveConstraint
+  | MinLengthConstraint
+  | MaxLengthConstraint
+  | PatternConstraint
+  | LessThanConstraint
+  | LessThanOrEqualConstraint
+  | NameAnnotation
+  | DescriptionAnnotation
+  | DefaultValueAnnotation
+  ;
+
+
+
+
+PropertyCount:
+  '[' min=PropertyMinCount OP_RANGE max=PropertyMaxCount ']';
+
+PropertyMinCount:
+  INTEGER;
+
+PropertyMaxCount:
+  (INTEGER | '*');
+
+
+NodeKind:
+  'BlankNode' | 'IRI' | 'Literal' | 'BlankNodeOrIRI' | 'BlankNodeOrLiteral' | 'IRIOrLiteral';
+
+
+PropertyShapeOrRef: ref=ShapeRef
+  | "{" body=PropertyShapeBody "}"
+    ;
+
+PropertyShapeBody : => (KW_PATH? path=Path) expr=PropertyExpression;
+PropertyExpression: expr=PropertyOr;
+PropertyOr: list+=PropertyXOne  (=> KW_OR list+=PropertyXOne)*;
+PropertyXOne: list+=PropertyAnd (=> KW_XONE list+=PropertyAnd)*;
+PropertyAnd: list+=PropertyNot  (=> (KW_AND list+=PropertyNot)
+	                                       |list+=PropertyNot)*;
+PropertyNot: negation?=(KW_NOT)? => atom=PropertyAtom;
+PropertyBracketted: "(" =>expr=PropertyExpression ")";
+PropertyAtom:
+    =>expr=PropertyBracketted
+  |	=>type=Iri
+  | =>nodeKind=NodeKind
+  | =>count=PropertyCount
+  | =>(qualified?=KW_QUALIFIED qualifiedCount=PropertyCount)? (KW_SHAPE)? shape=NodeShapeOrRef
+  | =>KW_PROPERTY propertyShape=PropertyShapeOrRef
+  | =>propertyConstraint=PropertyConstraint
+  | =>KW_MESSAGE message=Str
+  | =>KW_SEVERITY severity=Str
+  | =>closed?=KW_CLOSED
+  | =>deactivated?=KW_DEACTIVATED
+    ;
+
+NodeShapeOrRef:
+  ref=ShapeRef
+  | "{"  body= NodeShapeBody "}"
+  ;
+
+NodeShapeBody : expr=NodeExpression;
+NodeExpression: expr=NodeOr;
+NodeOr: list+=NodeXOne  (=> KW_OR list+=NodeXOne)*;
+NodeXOne: list+=NodeAnd (=> KW_XONE list+=NodeAnd)*;
+NodeAnd: list+=NodeNot  (=> (KW_AND | '.') list+=NodeNot)*;
+NodeNot: negation?=KW_NOT? atom=NodeAtom;
+NodeBracketted: "(" expr=NodeExpression ")";
+NodeAtom:
+  expr=NodeBracketted
+  | KW_PROPERTY propertyShapeRef=ShapeRef
+  | KW_SHAPE? shapeRef=ShapeRef
+  | propertyShape=PropertyShapeBody
+  | KW_RULE rule=RuleBodyOrRef
+  |	nodeConstraint=NodeConstraint
+  | nodeKind=NodeKind
+  | sparql=SparqlConstraint
+  | KW_MESSAGE message=Str
+  | KW_SEVERITY severity=Str
+  | closed?=KW_CLOSED
+  | deactivated?=KW_DEACTIVATED
+  ;
+
+
+/* key/value constraints */
+
+
+
+NameAnnotation:
+  param=KW_NAME '=' value=RdfLiteral
+;
+
+DescriptionAnnotation:
+  param=KW_DESCRIPTION '=' value=RdfLiteral
+;
+
+DefaultValueAnnotation:
+  param=KW_DEFAULT_VALUE '=' value=IriOrLiteral
+;
+
+TypeConstraint:
+  param=(KW_CLASS|KW_TYPE) value=Iri
+  ;
+
+InConstraint:
+  param=KW_IN '=' value=Array;
+
+HasValueConstraint:
+  param=KW_HAS_VALUE '=' value=IriOrLiteral;
+
+MinExclusiveConstraint:
+  param=KW_MIN_EXCLUSIVE '=' value=NumericLiteral;
+
+MinInclusiveConstraint:
+  param=KW_MIN_INCLUSIVE '=' value=NumericLiteral;
+
+MaxExclusiveConstraint:
+  param=KW_MAX_EXCLUSIVE '=' value=NumericLiteral;
+
+MaxInclusiveConstraint:
+  param=KW_MAX_INCLUSIVE '=' value=NumericLiteral;
+
+MinLengthConstraint:
+  param=KW_MIN_LENGTH '=' value=NumericLiteral;
+
+MaxLengthConstraint:
+  param=KW_MAX_LENGTH '=' value=NumericLiteral;
+
+PatternConstraint:
+  param=KW_PATTERN '=' value=Str;
+
+LessThanConstraint:
+  param=KW_LESS_THAN predicate=Iri;
+
+LessThanOrEqualConstraint:
+  param=KW_LESS_THAN_OR_EQUAL predicate=Iri;
+
+FN_STR:
+  'STR' | 'str';
+
+FN_LANG:
+  'LANG' | 'lang';
+
+FN_LANGMATCHES:
+  'LANGMATCHES' | 'langmatches';
+
+FN_DATATYPE:
+  'DATATYPE' | 'datatype';
+
+FN_BOUND:
+  'BOUND' | 'bound';
+
+FN_IRI:
+  'IRI' | 'iri';
+
+FN_URI:
+  'URI' | 'uri';
+
+FN_BNODE:
+  'BNODE' | 'bnode';
+
+FN_RAND:
+  'RAND' | 'rand';
+
+FN_CEIL:
+  'CEIL' | 'ceil';
+
+FN_FLOOR:
+  'FLOOR' | 'floor';
+
+FN_ROUND:
+  'ROUND' | 'round';
+
+FN_CONCAT:
+  'CONCAT' | 'concat';
+
+FN_SUBSTR:
+  'SUBSTR' | 'substr';
+
+FN_STRLEN:
+  'STRLEN' | 'strlen';
+
+FN_REPLACE:
+  'REPLACE' | 'replace';
+
+FN_UCASE:
+  'UCASE' | 'ucase';
+
+FN_LCASE:
+  'LCASE' | 'lcase';
+
+FN_ENCODE_FOR_URI:
+  'ENCODE_FOR_URI' | 'encode_for_uri';
+
+FN_CONTAINS:
+  'CONTAINS' | 'contains';
+
+FN_STRSTARTS:
+  'STRSTARTS' | 'strstarts';
+
+FN_STRENDS:
+  'STRENDS' | 'strends';
+
+FN_STRBEFORE:
+  'STRBEFORE' | 'strbefore';
+
+FN_STRAFTER:
+  'STRAFTER' | 'strafter';
+
+FN_YEAR:
+  'YEAR' | 'year';
+
+FN_MONTH:
+  'MONTH' | 'month';
+
+FN_DAY:
+  'DAY' | 'day';
+
+FN_HOURS:
+  'HOURS' | 'hours';
+
+FN_MINUTES:
+  'MINUTES' | 'minutes';
+
+FN_SECONDS:
+  'SECONDS' | 'seconds';
+
+FN_TIMEZONE:
+  'TIMEZONE' | 'timezone';
+
+FN_TZ:
+  'TZ' | 'tz';
+
+FN_NOW:
+  'NOW' | 'now';
+
+FN_UUID:
+  'UUID' | 'uuid';
+
+FN_STRUUID:
+  'STRUUID' | 'struuid';
+
+FN_MD5:
+  'MD5' | 'md5';
+
+FN_SHA1:
+  'SHA1' | 'sha1';
+
+FN_SHA256:
+  'SHA256' | 'sha256';
+
+FN_SHA384:
+  'SHA384' | 'sha384';
+
+FN_SHA512:
+  'SHA512' | 'sha512';
+
+FN_COALESCE:
+  'COALESCE' | 'coalesce';
+
+FN_IF:
+  'IF' | 'if';
+
+FN_STRLANG:
+  'STRLANG' | 'strlang';
+
+FN_STRDT:
+  'STRDT' | 'strdt';
+
+FN_SAMETERM:
+  'sameTerm' | 'SAMETERM' | 'sameterm';
+
+FN_ISIRI:
+  'isIRI';
+
+FN_ISURI:
+  'isURI' | 'ISURI' | 'isuri';
+
+FN_ISBLANK:
+  'isBLANK' | 'ISBLANK' | 'isblank';
+
+FN_ISLITERAL:
+  'isLITERAL' | 'ISLITERAL' | 'isliteral';
+
+FN_REGEXP:
+  'REGEX' | 'regexp';
+
+FN_COUNT:
+  'COUNT' | 'count';
+
+FN_AVG:
+  'AVG' | 'avg';
+
+FN_MIN:
+  'MIN' | 'min';
+
+FN_MAX:
+  'MAX' | 'max';
+
+FN_GROUP_CONCAT:
+  'GROUP_CONCAT' | 'group_concat';
+
+FN_SEPARATOR:
+  'SEPARATOR' | 'separator';
+
+FN_SUM:
+  'SUM' | 'sum';
+
+FN_SAMPLE:
+  'SAMPLE' | 'sample';
+
+SKW_ASK:
+  'ASK' | 'ask';
+
+SKW_SELECT:
+  'SELECT' | 'select';
+
+SKW_GRAPH:
+  'GRAPH' | 'graph';
+
+SKW_OPTIONAL:
+  'OPTIONAL' | 'optional';
+
+SKW_GROUP:
+  'GROUP' | 'group';
+
+SKW_BIND:
+  'BIND' | 'bind';
+
+SKW_HAVING:
+  'HAVING' | 'having';
+
+SKW_AS:
+  'AS' | 'as';
+
+SKW_ORDER:
+  'ORDER' | 'order';
+
+SKW_UNION:
+  'UNION' | 'union';
+
+SKW_MINUS:
+  'MINUS' | 'minus';
+
+SKW_VALUES:
+  'VALUES' | 'values';
+
+SKW_NAMED:
+  'NAMED' | 'named';
+
+SKW_FROM:
+  'FROM' | 'from';
+
+SKW_BY:
+  'BY' | 'by';
+
+SKW_LIMIT:
+  'LIMIT' | 'limit';
+
+SKW_FILTER:
+  'FILTER' | 'filter';
+
+SKW_ASC:
+  'ASC' | 'asc';
+
+SKW_DESC:
+  'DESC' | 'desc';
+
+SKW_EXISTS:
+  'EXISTS' | 'exists';
+
+SKW_OFFSET:
+  'OFFSET' | 'offset';
+
+SKW_DISTINCT:
+  'DISTINCT' | 'distinct';
+
+SKW_REDUCED:
+  'REDUCED' | 'reduced';
+
+SKW_CONSTRUCT:
+  'CONSTRUCT' | 'construct';
+
+SKW_WHERE:
+  'WHERE' | 'where';
+
+SKW_DESCRIBE:
+  'DESCRIBE' | 'describe';
+
+SKW_NOT:
+  'NOT' | 'not';
+
+SKW_IN:
+  'IN' | 'in';
+
+SKW_SERVICE:
+  'SERVICE' | 'service';
+
+SKW_SILENT:
+  'SILENT' | 'silent';
+
+KW_DEACTIVATED:
+  'deactivated';
+
+KW_IN:
+  'in';
+
+KW_HAS_VALUE:
+  'hasValue';
+
+KW_MIN_EXCLUSIVE:
+  'minExclusive';
+
+KW_MIN_INCLUSIVE:
+  'minInclusive';
+
+KW_MAX_EXCLUSIVE:
+  'maxExclusive';
+
+KW_MAX_INCLUSIVE:
+  'maxInclusive';
+
+KW_MIN_LENGTH:
+  'minLength';
+
+KW_MAX_LENGTH:
+  'maxLength';
+
+KW_PATTERN:
+  'pattern';
+
+KW_LESS_THAN:
+  '<';
+
+KW_LESS_THAN_OR_EQUAL:
+  '<=';
+
+KW_QUALIFIED:
+  'qualified';
+
+KW_CLOSED:
+  'closed';
+
+KW_PATH: 'path';
+
+KW_MESSAGE:
+  'message';
+
+KW_NAME:
+  'name';
+
+KW_GROUP:
+  'group';
+
+KW_DESCRIPTION:
+  'description';
+
+
+KW_SEVERITY:
+  'severity';
+
+KW_ORDER:
+  'order';
+
+KW_PRIORITY:
+  'priority';
+
+
+KW_RULE:
+  'rule';
+
+KW_CLASS:
+  'class';
+
+KW_PROPERTY:
+  'property';
+
+
+KW_CONDITION:
+  'if';
+
+KW_VALIDATOR:
+  'validator';
+
+KW_TARGET:
+  'target';
+
+KW_RETURNS:
+  'returns';
+
+KW_FUNCTION:
+  'function';
+
+KW_RESULT:
+  'result';
+
+KW_PARAMETER:
+  'parameter';
+
+KW_TYPE:
+  'type';
+
+KW_LABEL:
+  'label';
+
+KW_DEFAULT_VALUE:
+  'defaultValue';
+
+KW_OPTIONAL:
+  'optional';
+
+
+ShapeRef:
+  AT_PNAME_LN | AT_PNAME_NS | AT_IRIREF;
+
+RuleRef:
+  AT_PNAME_LN | AT_PNAME_NS | AT_IRIREF;
+
+TargetRef:
+  AT_PNAME_LN | AT_PNAME_NS | AT_IRIREF;
+
+FunctionRef:
+  AT_PNAME_LN | AT_PNAME_NS | AT_IRIREF;
+
+Path:
+  PathAlternative;
+
+PathAlternative:
+  list+=PathSequence (=> '|' list+=PathSequence)*;
+
+PathSequence:
+  list+=PathEltOrInverse (=> '/' list+=PathEltOrInverse)*;
+
+PathElt:
+  primary=PathPrimary pathMod=PathMod?;
+
+PathEltOrInverse:
+  inverse?=PathInverse? element=PathElt;
+
+PathInverse:
+  '^';
+
+PathMod:
+  '?' | '*' | '+';
+
+PathPrimary:
+  iri=Iri
+  | rdftype?='a'
+  | '!' negatedSet=PathNegatedPropertySet
+  | => '(' path=Path ')';
+
+PathNegatedPropertySet:
+  negated+=PathOneInPropertySet
+  | {PathNegatedPropertySet} '(' (negated+=PathOneInPropertySet (=> '|' negated+=PathOneInPropertySet)*)? ')';
+
+PathOneInPropertySet:
+  inverse?=PathInverse? (iri=Iri | rdftype?='a');
+
+IriOrLiteralOrArray:
+  {IriOrLiteralOrArray} iriOrLiteral=IriOrLiteral | array=Array;
+
+IriOrLiteral:
+  {IriOrLiteral} iri=Iri | literal=Literal;
+
+Iri:
+  iri=IRIREF | pname=PrefixedName | label=PrefixedLabel;
+
+PrefixedName:
+  PNAME_LN | PNAME_NS;
+
+PrefixedLabel:
+  LABEL_REF1 | LABEL_REF2;
+
+BlankNode:
+  BLANK_NODE_LABEL
+  | '[' ']';
+
+Literal:
+  RdfLiteral
+  | NumericLiteral
+  | BooleanLiteral;
+
+BooleanLiteral:
+  value=KW_TRUE | value=KW_FALSE;
+
+NumericLiteral:
+  value=INTEGER | value=DECIMAL | value=DOUBLE;
+
+RdfLiteral:
+  value=Str (lang=LANGTAG | dtype=DTYPETAG)?;
+
+Str:
+  STRING_LITERAL_LONG1
+  | STRING_LITERAL_LONG2
+  | STRING_LITERAL1
+  | STRING_LITERAL2;
+
+Array:
+  {Array} '[' list+=IriOrLiteral* ']';
+
+Variable:
+  VAR1 | VAR2;
+
+  // Keywords
+KW_LIBRARY:
+  'LIBRARY';
+
+KW_VERSION:
+  'VERSION';
+
+KW_BASE:
+  'BASE';
+
+KW_IMPORTS:
+  'IMPORTS';
+
+KW_PREFIX:
+  'PREFIX';
+
+KW_SHAPE_CLASS:
+  'shapeClass';
+
+KW_SHAPE:
+  'shape';
+
+KW_TRUE:
+  'true';
+
+KW_FALSE:
+  'false';
+
+KW_AND:
+  'and'  | OP_AND;
+
+KW_OR:
+  'or'  | OP_OR;
+
+KW_XONE:
+  'xone' | 'xor' | OP_XONE;
+
+KW_NOT:
+  'not'  | OP_NOT ;
+
+  // Terminals
+terminal OP_AND:
+  '&' | '\u2227';
+
+terminal OP_OR:
+  '|' | '\u2228';
+
+terminal OP_NOT:
+  '!' | '\u00AC';
+
+terminal OP_XONE:
+  '><' | '\u22BB' | '\u2A52';
+
+terminal OP_RANGE:
+  '..';
+
+terminal OP_TARGETS:
+  '->';
+
+terminal OP_TARGETS_SUBJECTS:
+  '*->';
+
+terminal OP_TARGETS_OBJECTS:
+  '->*';
+
+terminal VAR1:
+  '?' VARNAME;
+
+terminal VAR2:
+  '$' VARNAME;
+
+terminal VARNAME:
+  (PN_CHARS_U | DIGIT) (PN_CHARS_U | DIGIT | '\u00B7' | ('\u0300'..'\u036F') | ('\u203F'..'\u2040'))*;
+
+terminal PASS:
+  (' ' | '\t' | '\r' | '\n')+;
+
+terminal COMMENT:
+  '#' (!('\r' | '\n'))*;
+
+terminal IRIREF:
+  '<' (!('\u0000'..'\u0020' | '\u00ab' | '\u00bb' | '<' | '>' | '\"' | '{' | '}' | '|' | '^' | '`' | '\\') | UCHAR)*
+  '>'; /* #x00=NULL #01-#x1F=control codes #x20=space */
+terminal LABEL_REF1:
+  '\u00ab'->'\u00bb';
+
+terminal LABEL_REF2:
+  '<<'->'>>';
+
+terminal PNAME_NS:
+  PN_PREFIX? ':';
+
+terminal PNAME_LN:
+  PNAME_NS PN_LOCAL;
+
+terminal AT_PNAME_NS:
+  AT PN_PREFIX? ':';
+
+terminal AT_PNAME_LN:
+  AT PNAME_NS PN_LOCAL;
+
+terminal AT_IRIREF:
+  AT IRIREF;
+
+terminal DTYPETAG:
+  '^^' (PNAME_NS PN_LOCAL | IRIREF);
+
+terminal BLANK_NODE_LABEL:
+  '_:' (PN_CHARS_U | ('0'..'9')) ((PN_CHARS | '.')* PN_CHARS)?;
+
+terminal LANGTAG:
+  AT ('A'..'Z' | 'a'..'z')+ ('-' ('A'..'Z' | 'a'..'z' | '0'..'9')+)*;
+
+terminal INTEGER:
+  ('+' | '-')? DIGIT+;
+
+terminal DECIMAL:
+  ('+' | '-')? DIGIT* '.' DIGIT+;
+
+terminal DOUBLE:
+  ('+' | '-')? (DIGIT+ '.' DIGIT* EXPONENT | '.'? DIGIT+ EXPONENT);
+
+terminal UCASE_LABEL:
+  ('A'..'Z' | '_') ('A'..'Z' | '_' | DIGIT)*;
+
+terminal fragment EXPONENT:
+  ('e' | 'E') ('+' | '-')? DIGIT+;
+
+terminal STRING_LITERAL1:
+  '\'' (!('\u0027' | '\u005C' | '\u000A' | '\u000D') | ECHAR | UCHAR)* '\'';
+/* #x27=' #x5C=\ #xA=new line #xD=carriage return */
+terminal STRING_LITERAL2:
+  '"' (!('\u0022' | '\u005C' | '\u000A' | '\u000D') | ECHAR | UCHAR)* '"';
+/* #x22=" #x5C=\ #xA=new line #xD=carriage return */
+terminal STRING_LITERAL_LONG1:
+  '\'\'\'' (('\'' | '\'\'')? (!('\'' | ('\\')) | ECHAR | UCHAR))* '\'\'\'';
+
+terminal STRING_LITERAL_LONG2:
+  '"""' (('"' | '""')? (!('\"' | ('\\')) | ECHAR | UCHAR))* '"""';
+
+terminal fragment AT:
+  '@';
+
+terminal fragment DIGIT:
+  '0'..'9';
+
+terminal fragment UCHAR:
+  ('\\' 'u' HEX HEX HEX HEX) | ('\\' 'U' HEX HEX HEX HEX HEX HEX HEX HEX);
+
+terminal fragment ECHAR:
+  '\\' ('t' | 'b' | 'n' | 'r' | 'f' | '\\' | '\"' | '\'');
+
+terminal fragment PN_CHARS_BASE:
+  ('A'..'Z') | ('a'..'z') | ('\u00C0'..'\u00D6') | ('\u00D8'..'\u00F6') | ('\u00F8'..'\u02FF') | ('\u0370'..'\u037D')
+  | ('\u037F'..'\u1FFF') | ('\u200C'..'\u200D') | ('\u2070'..'\u218F') | ('\u2C00'..'\u2FEF') | ('\u3001'..'\uD7FF')
+  | ('\uF900'..'\uFDCF') | ('\uFDF0'..'\uFFFD');
+
+terminal fragment PN_CHARS_U:
+  PN_CHARS_BASE | '_';
+
+terminal fragment PN_CHARS:
+  PN_CHARS_U | '-' | DIGIT | '\u00B7' | ('\u0300'..'\u036F') | ('\u203F'..'\u2040');
+
+terminal fragment PN_PREFIX:
+  PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?;
+
+terminal fragment PN_LOCAL:
+  (PN_CHARS_U | ':' | DIGIT | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?;
+
+terminal fragment PLX:
+  PERCENT | PN_LOCAL_ESC;
+
+terminal fragment PERCENT:
+  '%' HEX HEX;
+
+terminal fragment HEX:
+  DIGIT | ('A'..'F') | ('a'..'f');
+
+terminal fragment PN_LOCAL_ESC:
+  '\\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | '\'' | '(' | ')' | '*' | '+' | ','
+  | ';' | '=' | '/' | '?' | '#' | '@' | '%');
+
