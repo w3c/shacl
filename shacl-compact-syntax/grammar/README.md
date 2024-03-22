@@ -13,8 +13,8 @@ We use two tools to understand them and try to unify them:
 - https://github.com/GuntherRademacher/rr to produce "rail-road" diagrams, which make it easier to understand the grammars.
 
 Problems:
-- Unicode escapes in XText: https://github.com/GuntherRademacher/ebnf-convert/issues/8 .
-  So we also saved `shaclc-XText-orig.xtext` in case we need to adapt it.
+- DONE: Unicode escapes in XText: https://github.com/GuntherRademacher/ebnf-convert/issues/8 .
+  This was fixed 22-Mar-2024: build from source and use `build/distributions/ebnf-convert-0.68-SNAPSHOT-java11.zip/ebnf-convert.war`
 - Two problems in Jison: https://github.com/w3c/shacl/issues/48 .
   So we also saved `shaclc-Jison-orig.jison` in case we need to adapt it.
 
@@ -26,5 +26,5 @@ Problems:
 Initial results:
 - [shacl-ANTLR.g4](shacl-ANTLR.g4) -> [shacl-ANTLR.ebnf](shacl-ANTLR.ebnf) -> [shaclc-ANTLR.html](https://rawgit2.com/shacl/master/shacl-compact-syntax/grammar/shaclc-ANTLR.html) (or [in branch](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-ANTLR.html))
 - [shacl-JavaCC.jj](shacl-JavaCC.jj) -> [shacl-JavaCC.ebnf](shacl-JavaCC.ebnf) -> [shaclc-JavaCC.html](https://rawgit2.com/shacl/master/shacl-compact-syntax/grammar/shaclc-JavaCC.html) (or [in branch](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-JavaCC.html))
-- [shacl-XText.xtext](shacl-XText.xtext) -> [shacl-XText.ebnf](shacl-XText.ebnf) -> [shaclc-XText.html](https://rawgit2.com/shacl/master/shacl-compact-syntax/grammar/shaclc-XText.html) (or [in branch](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html)) (BROKEN)
+- [shacl-XText.xtext](shacl-XText.xtext) -> [shacl-XText.ebnf](shacl-XText.ebnf) -> [shaclc-XText.html](https://rawgit2.com/shacl/master/shacl-compact-syntax/grammar/shaclc-XText.html) (or [in branch](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html))
 - [shacl-Jison.jison](shacl-Jison.jison) -> [shacl-Jison.ebnf](shacl-Jison.ebnf) -> [shaclc-Jison.html](https://rawgit2.com/shacl/master/shacl-compact-syntax/grammar/shaclc-Jison.html) (or [in branch](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-Jison.html)) (BROKEN)
