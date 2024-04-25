@@ -251,20 +251,37 @@ PARAM                   'deactivated' | 'severity' | 'message' | 'class' | 'data
 
 <<EOF>>                 return 'EOF'
 
-/lex
+%ebnf
 
-// %ebnf
+/lex
 
 %start shaclDoc
 
 %%
 
-// TODO: Work out why this occurs multiple times when the empty file is called with other things (the base from the previous file is somehow getting leaked thorugh)
-shaclDoc            : directive* (nodeShape|shapeClass)* ttlSection EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+
+shaclDoc            : directiveOrMore nodeShapeOrShapeClassOrMore ttlSection EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | nodeShapeOrShapeClassOrMore ttlSection EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | directiveOrMore ttlSection EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | ttlSection EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | directiveOrMore nodeShapeOrShapeClassOrMore EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | nodeShapeOrShapeClassOrMore EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | directiveOrMore EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
+                    | EOF -> emit(Parser.factory.namedNode(resolveIRI('')), Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(OWL + 'Ontology'))
                     ;
 
+directiveOrMore     : directive 
+                    | directive directiveOrMore ;
+
+nodeShapeOrShapeClassOrMore : nodeShapeOrShapeClass
+                            | nodeShapeOrShapeClass nodeShapeOrShapeClassOrMore ;
+
+nodeShapeOrShapeClass : nodeShape
+                      | shapeClass
+                      ;
+
 directive           : baseDecl | importsDecl | prefixDecl ;
-                    // TODO: Remove the duplicate declaration of base
+
 baseDecl            : KW_BASE  IRIREF
                     {
                       Parser.base = Parser.factory.namedNode($2.slice(1, -1));
@@ -272,7 +289,6 @@ baseDecl            : KW_BASE  IRIREF
                     }
                     ;
 
-                    // TODO: See if this should be resolveIRI($2)
 importsDecl         : KW_IMPORTS IRIREF -> emit(Parser.base, Parser.factory.namedNode(OWL + 'imports'), Parser.factory.namedNode($2.slice(1, -1)))
                     ;
 
@@ -286,22 +302,32 @@ nodeShapeIri        : iri
                     }
                     ;
 
-nodeShape           : KW_SHAPE nodeShapeIri targetClass? turtleAnnotation? nodeShapeBody
+nodeShape           : KW_SHAPE nodeShapeIri targetClass turtleAnnotation nodeShapeBody
+                    | KW_SHAPE nodeShapeIri turtleAnnotation nodeShapeBody
+                    | KW_SHAPE nodeShapeIri targetClass nodeShapeBody
+                    | KW_SHAPE nodeShapeIri nodeShapeBody
                     ;
 
-shapeClass          : KW_SHAPE_CLASS nodeShapeIri turtleAnnotation? nodeShapeBody -> emit(Parser.currentNodeShape, Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(RDFS + 'Class'))
+shapeClass          : KW_SHAPE_CLASS nodeShapeIri turtleAnnotation nodeShapeBody -> emit(Parser.currentNodeShape, Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(RDFS + 'Class'))
+                    | KW_SHAPE_CLASS nodeShapeIri nodeShapeBody -> emit(Parser.currentNodeShape, Parser.factory.namedNode(RDF_TYPE), Parser.factory.namedNode(RDFS + 'Class'))
                     ;
 
 turtleAnnotation    : ';' turtleAnnotation2 -> ensureExtended()
                     ;
 
-turtleAnnotation2   : predicate turtleAnnotation?
+turtleAnnotation2   : predicate
+                    | predicate turtleAnnotation
                     ;
 
 predicate           : iri objectList -> $2.forEach(e => emit(Parser.currentNodeShape, $1, e))
                     ;
 
-objectList          : object objectTail* -> [$1, ...$2]
+objectList          : object -> [$1]
+                    | object objectTailOrMore -> [$1, ...$2]
+                    ;
+
+objectTailOrMore    : objectTail
+                    | objectTailOrMore objectTail
                     ;
 
 object              : iriOrLiteral
@@ -309,7 +335,12 @@ object              : iriOrLiteral
                     | list
                     ;
 
-list                : '(' object* ')' -> addList($2, true)
+objectOrMore        : object
+                    | objectOrMore object
+                    ;
+
+list                : '(' ')' -> addList([], true)
+                    | '(' objectOrMore ')' -> addList($2, true)
                     ;
 
 objectTail          : ',' object -> $2
@@ -356,7 +387,8 @@ iriHead             : iri
 ttlStatement        : iriHead turtleAnnotation2 "." 
                     ;
 
-ttlSection          : ttlStatement*
+ttlSection          : ttlStatement
+                    | ttlSection ttlStatement
                     ;
 
 startNodeShape      : '{'
@@ -366,7 +398,6 @@ startNodeShape      : '{'
                       } else {
                         Parser.nodeShapeStack.push(Parser.currentNodeShape);
                         emit(
-                          // In the grammar a path signals the start of a new property declaration
                           Parser.currentPropertyNode,
                           Parser.factory.namedNode(SH + 'node'),
                           Parser.currentNodeShape = blank(),
@@ -385,13 +416,31 @@ endNodeShape        : '}'
                     }
                     ;
 
-nodeShapeBody       : startNodeShape constraint* endNodeShape -> $1
+constraintOrMore    : constraint
+                    | constraintOrMore constraint
                     ;
 
-targetClass         : '->' iri+ -> $2.forEach(node => { emit(Parser.currentNodeShape, Parser.factory.namedNode(SH + 'targetClass'), node) })
+nodeShapeBody       : startNodeShape endNodeShape -> $1
+                    | startNodeShape constraintOrMore endNodeShape -> $1
                     ;
 
-constraint          : ( nodeOrEmit+ | propertyShape ) pcSection? '.'
+iriOrMore           : iri
+                    | iriOrMore iri
+                    ;
+
+targetClass         : '->' iriOrMore -> $2.forEach(node => { emit(Parser.currentNodeShape, Parser.factory.namedNode(SH + 'targetClass'), node) })
+                    ;
+
+nodeOrEmitOrMore    : nodeOrEmit
+                    | nodeOrEmitOrMore nodeOrEmit
+                    ;
+
+nodeOrEmitOrMoreOrPropertyShape : nodeOrEmitOrMore
+                                | propertyShape
+                                ;
+
+constraint          : nodeOrEmitOrMoreOrPropertyShape pcSection '.'
+                    | nodeOrEmitOrMoreOrPropertyShape '.'
                     ;
 
 orNotComponent      : '|' nodeNot -> $2
@@ -400,11 +449,14 @@ orNotComponent      : '|' nodeNot -> $2
 nodeOrEmit          : nodeOr -> emit(Parser.currentNodeShape, Parser.factory.namedNode(SH + $1[0]), $1[1])
                     ;
 
+orNotComponentOrMore : orNotComponent
+                     | orNotComponentOrMore orNotComponent
+                     ;
+
 nodeOr              : nodeNot
                     {
-                      // console.log('ndoe not')
                     }
-                    | nodeNot orNotComponent+
+                    | nodeNot orNotComponentOrMore
                     {
                       const o = addList([$1, ...$2].map(elem => {
                         const x = blank();
@@ -418,28 +470,22 @@ nodeOr              : nodeNot
 nodeNot             : nodeValue
                     | negation nodeValue -> chainProperty('not', ...$2)
                     ;
-nodeValue           : (TARGET | PARAM) '=' iriOrLiteralOrArray -> [$1, $3]
+
+targetOrParam : TARGET | PARAM ;
+
+nodeValue           : targetOrParam '=' iriOrLiteralOrArray -> [$1, $3]
                     ;
 
-propertyShape       : path ( propertyCount | propertyOr )*
+propertyShape       : path 
+                    | propertyShape propertyCount
+                    | propertyShape propertyOr
                     ;
 
 propertyOrComponent : '|' propertyNot -> $2
                     ;
 
-// Top level property emission
-propertyOr          : propertyNot -> $1 && emitProperty(...$1)
-                    | propertyNot propertyOrComponent+
-                    {
-                      $$ = emitProperty(
-                        'or',
-                        addList([$1, ...$2].map(elem => {
-                          const x = blank();
-                          emit(x, Parser.factory.namedNode(SH + elem[0]), elem[1]);
-                          return x;
-                        }))
-                      )
-                    }
+propertyOr          : propertyNot
+                    | propertyOr propertyOrComponent
                     ;
 
 propertyNot         : propertyAtom
@@ -450,7 +496,6 @@ propertyAtom        : iri -> [datatypes[$1.value] ? 'datatype' : 'class', $1]
                     | NODEKIND -> ['nodeKind', Parser.factory.namedNode(SH + $1)]
                     | shapeRef -> ['node', Parser.factory.namedNode($1)]
                     | PARAM '=' iriOrLiteralOrArray -> [$1, $3]
-                    // TODO: Fix this workaround (the node *should* be emitted this way)
                     | nodeShapeBody -> undefined //['node', $1]
                     ;
 
@@ -464,9 +509,9 @@ propertyMaxCount    : INTEGER -> emitProperty('maxCount', createTypedLiteral($1,
                     | '*'
                     ;
 
-                    // TODO: Check this
-shapeRef            : (ATPNAME_LN | ATPNAME_NS) -> expandPrefix($1.slice(1))
-                    | '@' IRIREF -> resolveIRI($2)
+shapeRef            : ATPNAME_LN
+                    | ATPNAME_NS
+                    | '@' IRIREF
                     ;
 
 negation            : '!' ;
@@ -474,7 +519,6 @@ negation            : '!' ;
 path                : pathAlternative
                     {
                       emit(
-                        // In the grammar a path signals the start of a new property declaration
                         Parser.currentNodeShape,
                         Parser.factory.namedNode(SH + 'property'),
                         Parser.currentPropertyNode = blank(),
@@ -488,36 +532,21 @@ additionalAlternative : '|' pathSequence -> $2
                       ;
 
 pathAlternative     : pathSequence
-                    | pathSequence additionalAlternative+
-                    {
-                      const n = blank();
-                      emit(
-                        n,
-                        Parser.factory.namedNode(SH + 'alternativePath'),
-                        addList([$1, ...$2])
-                      )
-                      $$ = n
-                    }
+                    | pathAlternative additionalAlternative
                     ;
 
 additionalSequence : '/' pathEltOrInverse -> $2
                     ;
 
 pathSequence        : pathEltOrInverse
-                    | pathEltOrInverse additionalSequence+ -> addList([$1, ...$2])
+                    | pathSequence additionalSequence
 
                     ;
 pathElt             : pathPrimary
                     | pathPrimary pathMod
-                    {
-                      emit($$ = blank(), Parser.factory.namedNode(SH + $2), $1)
-                    }
                     ;
 pathEltOrInverse    : pathElt
                     | pathInverse pathElt
-                    {
-                      emit($$ = blank(), Parser.factory.namedNode(SH + 'inversePath'), $2)
-                    }
                     ;
 pathInverse         : '^' ;
 pathMod             : '?' -> 'zeroOrOnePath'
@@ -526,39 +555,40 @@ pathMod             : '?' -> 'zeroOrOnePath'
                     ;
 
 pathPrimary         : iri
-                    // TODO: Check this (I don' think there needs to be any other special logic for the brackets here)
-                    // Note that this is pathAlternative rather than just path as path is a special trigger to emit
-                    // the root quad
                     | '(' pathAlternative ')' -> $2
                     ;
 
+iriOrLiteralOrMore  : iriOrLiteral
+                    | iriOrLiteralOrMore iriOrLiteral
+                    ;
+
 iriOrLiteralOrArray : iriOrLiteral
-                    | '[' iriOrLiteral* ']' -> addList($2)
+                    | '[' ']'
+                    | '[' iriOrLiteralOrMore ']'
                     ;
 
 iriOrLiteral        : iri | literal ;
 
-iri : IRIREF -> Parser.factory.namedNode(resolveIRI($1))
-    // TODO: Double check expand prefix works on both
-    | (PNAME_LN | PNAME_NS) -> Parser.factory.namedNode(expandPrefix($1))
-    | 'a' -> ensureExtended(Parser.factory.namedNode(RDF_TYPE))
+iri : IRIREF
+    | PNAME_LN
+    | PNAME_NS
+    | 'a'
     ;
 
 literal
-    // RDF LITERALS
     : string -> createTypedLiteral($1)
-    // TODO: check this
     | string LANGTAG  -> createLangLiteral($1, lowercase($2.substr(1)))
     | string '^^' iri -> createTypedLiteral($1, $3)
-    // NUMERIC LITERALS
     | INTEGER -> createTypedLiteral($1, XSD_INTEGER)
     | DECIMAL -> createTypedLiteral($1, XSD_DECIMAL)
     | DOUBLE -> createTypedLiteral($1.toLowerCase(), XSD_DOUBLE)
-    // BOOLEAN LITERALS
-    | (KW_TRUE | KW_FALSE) -> createTypedLiteral($1.toLowerCase(), XSD_BOOLEAN)
+    | KW_TRUE -> createTypedLiteral($1.toLowerCase(), XSD_BOOLEAN)
+    | KW_FALSE -> createTypedLiteral($1.toLowerCase(), XSD_BOOLEAN)
     ;
 
 string
-    : (STRING_LITERAL1 | STRING_LITERAL2) -> unescapeString($1, 1)
-    | (STRING_LITERAL_LONG1 | STRING_LITERAL_LONG2) -> unescapeString($1, 3)
+    : STRING_LITERAL1
+    | STRING_LITERAL2
+    | STRING_LITERAL_LONG1
+    | STRING_LITERAL_LONG2
     ;
