@@ -666,7 +666,7 @@ ex:PersonShape
 		sh:focusNode ex:Alice ;
 		sh:resultPath ex:ssn ;
 		sh:value "987-65-432A" ;
-		sh:sourceConstraintComponent sh:RegexConstraintComponent ;
+		sh:sourceConstraintComponent sh:PatternConstraintComponent ;
 		sh:sourceShape ... blank node _:b1 on ex:ssn above ... ;
 	] ,
 	[	a sh:ValidationResult ;
@@ -696,7 +696,7 @@ ex:PersonShape
 				<p>
 					The <a>validation results</a> are enclosed in a <a>validation report</a>.
 					The first <a>validation result</a> is produced because <code>ex:Alice</code> has a <a>value</a> for <code>ex:ssn</code>
-					that does not match the regular expression specified by the property <code>sh:regex</code>.
+					that does not match the regular expression specified by the property <code>sh:pattern</code>.
 					The second <a>validation result</a> is produced because <code>ex:Bob</code> has more than the permitted number of <a>values</a>
 					for the property <code>ex:ssn</code> as specified by the <code>sh:maxCount</code> of 1.
 					The third <a>validation result</a> is produced because <code>ex:Calvin</code> has a <a>value</a> for <code>ex:worksFor</code>
