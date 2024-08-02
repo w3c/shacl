@@ -18,15 +18,28 @@ Note that this should be done *after* these features have been supported by the 
 
 ## New Features
 
-### Support for additional SHACL-C shorthands
- - Support Rules
- - Support (SPARQL) Functions
- - Support shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
- - [Support `xone` and more `or` cases](https://github.com/w3c/shacl/issues/12)
- - Opting out of the production of the triple `?baseUri rdf:type owl:Ontology`
-  - Support for non-validating characteristics (e.g., generating `sh:order` triples by declaring `@order` at the top of a file/shape, allow grouping by `@group` at the top of a set of properties, and allowing a `@description` above properties).
+### Support for Additional SHACL-C Constructs
+- shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
+- [Support `xone` and more `or` cases](https://github.com/w3c/shacl/issues/12)
+- Opt out of the production of the triple `?baseUri rdf:type owl:Ontology`
+- Non-validating characteristics (e.g., generating `sh:order` triples by declaring `@order` at the top of a file/shape, allow grouping by `@group` at the top of a set of properties, and allowing a `@description` above properties).
+- Target shapes, see [rsx:targetShape](https://rdf4j.org/shacl/extensions.html)
 
-The first 2 of these have been supported in [this xtext file](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext) by [allotrope](https://www.allotrope.org/). Some or all of these additions may be ignored in favour of keeping SHACL-C a simple syntax to implement and use.
+A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext) by [Allotrope](https://www.allotrope.org/):
+- [Shape Libraries](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ShaclDoc) (versioned). Packaging shapes into libraries enables modularized development of shapes. It is used together with Import. A shape library is very similar to an OWL ontology and works technically in the same way. In fact we now use OWL ontology because of inference from owl:import, but there was quite some discussion, whether the assembly of shapes is an ontology in the OWL sense. For any large scale application of SHACL it is a must to modularize and it felt like a serious gap in the specification
+The inclusion of SPARQL were a result that expressiveness of SHACL alone was not enough for the Allotrope use case. We must for example ensure the unique presence of some nodes in an Allotrope file and use the SHACL SPARQL extension for it. If we support SPARQL, it feels natural to also apply it to select targets. Allotrope uses SPARQL sparingly because it is an extension only, so from the view of many of the Allotrope members, not "official" enough.
+having a syntax for SPARQL allows a much better integration. We do not have a language within a language. XText (and other grammar based code generators) can be used to directly generate code from it and it is so much more powerful, if you have a single parser, that ensures consistency
+graphical operators are a way to make it more compact, at the price that you cannot type them (fast) on your keyboard, so I made them optional. The use of well-known operators can help to make the code more readable and I expect like all models that they are far more often read then written, but where the boundary to obscurity ends can be discussed
+- [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl)
+- Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
+- [Parameterized Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape)
+- [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape) but unlike SHACL-AF rules that have `subject, property, object` or SPARQL, [these rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) Construct, and have an "IF" part (being a shape to check) and PRIORITY
+- [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions
+- Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
+- [SPARQL Constraints](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) expressed with a dedicated syntax (i.e. you don't need to do `"""<sparql query>"""`)
+- [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (eg `><,  ⊻, ⩒`) in addition to keywords (eg `xone, xor`)
+
+Some or all of these additions may be ignored in favour of keeping SHACL-C a simple syntax to implement and use.
 
 ### [Making SHACL-C Lossless](https://github.com/w3c/shacl/issues/36)
 
@@ -34,7 +47,7 @@ There are attempts to implement lossless SHACL-C by allowing the use of a more T
  - [Extended Compact Syntax in `shaclcjs`](https://github.com/jeswr/shaclcjs?tab=readme-ov-file#extended-shacl-compact-syntax)
  - [make SHACL-C→SHACL nearly lossless TopQuadrant/shacl#98](https://github.com/TopQuadrant/shacl/issues/98) (escape into Turtle, and some extra links and ideas)
 
-### Extending the test suite
+## Extending the Test Suite
 
 There is also work that can be done to make the test suite more robust such as:
  - [SHACL-C: missing property shape TopQuadrant/shacl#142](https://github.com/TopQuadrant/shacl/issues/142) (test case)
@@ -42,10 +55,21 @@ There is also work that can be done to make the test suite more robust such as:
  - [SHACL conversion: malformed lists TopQuadrant/shacl#92](https://github.com/TopQuadrant/shacl/issues/92) (test case)
 
 ## Implementations
-The current SHACL-C implementations include
- - https://jena.apache.org/documentation/shacl/#shacl-compact-syntax
- - https://github.com/jeswr/shaclcjs and https://github.com/jeswr/shaclc-writer
- - https://gitlab.com/allotrope-open-source/shape-editor
+Current SHACL-C implementations include the following.
+
+Parsers/writers (i.e. convertors between SHACL and SHACL-C)
+ - TopQuadrant had a SHACL-C implementation that is deprecated in favor of Jena's.
+   The the current SHACL-C specification [cites the grammar](https://w3c.github.io/shacl/shacl-compact-syntax/#grammar-section) of this implementation
+ - [Jena](https://jena.apache.org/documentation/shacl/#shacl-compact-syntax): implemented in Java
+ - [allotrope-open-source/shape-editor](https://gitlab.com/allotrope-open-source/shape-editor): implemented in Java for the Eclipse framework (uses XTEXT).
+   Introduces a number of number of new SHACL-C Constructs (see https://github.com/w3c/shacl/issues/52 ), reflected above
+ - [jeswr/shaclcjs](https://github.com/jeswr/shaclcjs) and [jeswr/shaclc-writer](https://github.com/jeswr/shaclc-writer): implemented in JavaScript
+ - [edmondchuc/shaclc](https://github.com/edmondchuc/shaclc): implemented in Python, also has a [playground](https://edmondchuc.github.io/shaclc/)
+
+Editing helpers:
+- [jeswr/shaclc-language-server](https://github.com/jeswr/shaclc-language-server): Language Server, implements intellisense features for modern IDEs like VS-Code
+- [VladimirAlexiev/shaclc-mode](https://github.com/VladimirAlexiev/shaclc-mode): for Emacs, implements syntax checking and highlighting, jumping from reference to definition
+
 
 ## Related Issues
  - [SHACL-compact-syntax #7](https://github.com/w3c/shacl/issues/7)
