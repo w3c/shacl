@@ -26,18 +26,27 @@ Note that this should be done *after* these features have been supported by the 
 - Target shapes, see [rsx:targetShape](https://rdf4j.org/shacl/extensions.html)
 
 A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext) by [Allotrope](https://www.allotrope.org/):
-- [Shape Libraries](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ShaclDoc) (versioned). Packaging shapes into libraries enables modularized development of shapes. It is used together with Import. A shape library is very similar to an OWL ontology and works technically in the same way. In fact we now use OWL ontology because of inference from owl:import, but there was quite some discussion, whether the assembly of shapes is an ontology in the OWL sense. For any large scale application of SHACL it is a must to modularize and it felt like a serious gap in the specification
-The inclusion of SPARQL were a result that expressiveness of SHACL alone was not enough for the Allotrope use case. We must for example ensure the unique presence of some nodes in an Allotrope file and use the SHACL SPARQL extension for it. If we support SPARQL, it feels natural to also apply it to select targets. Allotrope uses SPARQL sparingly because it is an extension only, so from the view of many of the Allotrope members, not "official" enough.
-having a syntax for SPARQL allows a much better integration. We do not have a language within a language. XText (and other grammar based code generators) can be used to directly generate code from it and it is so much more powerful, if you have a single parser, that ensures consistency
-graphical operators are a way to make it more compact, at the price that you cannot type them (fast) on your keyboard, so I made them optional. The use of well-known operators can help to make the code more readable and I expect like all models that they are far more often read then written, but where the boundary to obscurity ends can be discussed
+- [Shape Libraries](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ShaclDoc) (versioned). Packaging shapes into libraries enables modularized development of shapes. 
+  It is used together with Import. 
+  A shape library is very similar to an OWL ontology and works technically in the same way. 
+  In fact we now use OWL ontology because of inference from `owl:import`, but there was quite some discussion, whether the assembly of shapes is an ontology in the OWL sense. 
+  For any large scale application of SHACL it is a must to modularize and it felt like a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl)
 - Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
+  The inclusion of SPARQL were a result that expressiveness of SHACL alone was not enough for the Allotrope use case. 
+  We must for example ensure the unique presence of some nodes in an Allotrope file and use the SHACL SPARQL extension for it. 
+  If we support SPARQL, it feels natural to also apply it to select targets. 
+  Allotrope uses SPARQL sparingly because it is an extension only, so from the view of many of the Allotrope members, not "official" enough.
 - [Parameterized Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape)
 - [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape) but unlike SHACL-AF rules that have `subject, property, object` or SPARQL, [these rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) Construct, and have an "IF" part (being a shape to check) and PRIORITY
 - [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
-- [SPARQL Constraints](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) expressed with a dedicated syntax (i.e. you don't need to do `"""<sparql query>"""`)
-- [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (eg `><,  ⊻, ⩒`) in addition to keywords (eg `xone, xor`)
+- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. you don't need to do `"""<sparql query>"""`.
+  Having a syntax for SPARQL allows a much better integration. 
+  We do not have a language within a language. 
+  XText (and other grammar based code generators) can be used to directly generate code from it and it is so much more powerful, if you have a single parser, that ensures consistency.
+- [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (eg `><,  ⊻, ⩒`) in addition to keywords (eg `xone, xor`).
+  It is a way to make SHACL-C even more compact, but many people cannot type them easily. The use of well-known operators can help make code more readable and we expect that like all models, they are far more often read then written, but where the boundary to obscurity ends can be discussed
 
 Some or all of these additions may be ignored in favour of keeping SHACL-C a simple syntax to implement and use.
 
