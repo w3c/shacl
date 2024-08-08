@@ -44,8 +44,7 @@
       footer {
         font-size: small;
       }
-    </style>
-    <style>
+
       body {
         max-width: 60em;
         margin: auto;;
@@ -166,10 +165,11 @@
         <li>update SHACL in line with 1.2 version updates to RDF &amp; SPARQL, the core Semantic Web standards that SHACL is built on</li>
         <li>extend the specification of advanced use of SHACL in line with use observed sinch 2017 - SHACL 1.0</li>
         <li>develop new SAHCL-based specifications in the areas of:
-          <ul>
+          <ul style="margin-top:10px;">
             <li>auto-generation of user interfaces to RDF graphs</li>
             <li>reasoning rules - their dependencies, ordering and packaging</li>
             <li>profiling mechanisms - how to specify constraints on specifications &amp; models</li>
+            <li>a "compact" syntax</li>
           </ul>
         </li>
       </ul>
@@ -199,13 +199,64 @@
       <h3 id="specifications">
         Specifications
       </h3>
-      <p class="remove">
-        {TBD: Provide a brief description of each specification the group plans
-        to produce. Where an estimate is possible, it can be useful to provide an
-        estimated schedule for key deliverables. As described below, the group
-        may later modify the charter deliverables. if no specifications, include:
-        "No Specifications will be produced under the current charter."}
-      </p>
+      <dl>
+        <dt class="spec">SHACL 1.2 Core</dt>
+        <dd>
+          <p>
+            This specification will basically be an updated and slightly extended version of the <a href="https://www.w3.org/TR/shacl/#part1">first part the SHACL 1.0 spec</a>.
+            It should fix some unfinished issues in SHACL 1.0, such as recursion.
+            A goal is maximum backwards compatibility.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-core">SHACL Core GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-core/index.html">SHACL 1.2 Core draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 SPARQL Extensions</dt>
+        <dd>
+          <p>
+            This specification will be an incremental update of the <a href="https://www.w3.org/TR/shacl/#part2">second part the SHACL 1.0 spec</a>.
+            It would include selected SPARQL-related features from the <a href="https://w3c.github.io/shacl/shacl-af/">SHACL Advanced Features Report</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-sparql">SHACL-SPARQL GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-sparql/index.html">SHACL 1.2 SPARQL Extensions draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 User Interfaces</dt>
+        <dd>
+          <p>
+            This specification will define a richer vocabulary that can be queried by user interface tools to produce renderings of RDF graphs,
+            in particular for viewing and editing RDF resources on forms.
+            An example starting point is the <a href="https://datashapes.org/forms.html">DASH vocabulary</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Inferencing Rules</dt>
+        <dd>
+          <p>
+            This specification will define a SHACL vocabulary to represent inferencing rules that can be used to infer new RDF statements from existing statements.
+            A starting point may be the <a href="https://w3c.github.io/shacl/shacl-af/#node-expressions">Node Expressions</a> and <a href="https://w3c.github.io/shacl/shacl-af/#rules">SHACL Rules</a>
+            from the Advanced Features document.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Compact Syntax</dt>
+        <dd>
+          <p>
+            This specification will define an alternative "compact" syntax that is custom-tailored for SHACL shapes.
+            A starting point is the <a href="https://w3c.github.io/shacl/shacl-compact-syntax/">SHACL Compact Syntax draft</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/compact%20syntax">SHACL Compact Syntax GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-compact-syntax/index.html">SHACL 1.2 Compact Syntax draft</a>.
+          </p>
+        </dd>
+      </dl>
       <h3 id="non-normative-reports">
         Non-Normative Reports
       </h3>
