@@ -44,8 +44,7 @@
       footer {
         font-size: small;
       }
-    </style>
-    <style>
+
       body {
         max-width: 60em;
         margin: auto;;
@@ -129,7 +128,8 @@
               Chairs
             </th>
             <td>
-              TBD
+              Nicholas Car (KurrawongAI)<br />
+              Eliana Papoutsoglou (Taxonic)
             </td>
           </tr>
           <tr>
@@ -166,7 +166,7 @@
         <li>update SHACL in line with 1.2 version updates to RDF &amp; SPARQL, the core Semantic Web standards that SHACL is built on</li>
         <li>extend the specification of advanced use of SHACL in line with use observed since 2017 & SHACL 1.0</li>
         <li>develop new SHACL-based specifications in the areas of:
-          <ul>
+          <ul style="margin-top:10px;">
             <li>auto-generation of user interfaces to RDF graphs</li>
             <li>reasoning rules - their dependencies, ordering and packaging</li>
             <li>profiling mechanisms - how to specify constraints on specifications &amp; models</li>
@@ -177,89 +177,120 @@
       <h2 id="scope-of-work">
         Scope of Work
       </h2>
-      <p class="remove">
-        {TBD: Describe topics that are in scope. For specifications that the CLA
-        patent section applies to, it is helpful to describe the scope in a way
-        that it is clear what types of technologies will be defined in
-        specifications, as opposed to adoption by reference or underlying
-        technology not defined in the proposed spec. Key use cases are often
-        helpful in describing scope. If no specifications will be defined in the
-        group that the CLA patent section applies to, the charter should clearly
-        state that. A clear scope is particularly important where patent
-        licensing obligations may apply.}
+      <p>
+        The scope of work for this WG is the delivery of the Specifications listed below in <a href="#deliverables">Deliverables</a> section only. This includes test suite extensions and implementations necessary for specification ratification.
       </p>
+      <h3 id="phases">Phases</h3>
+      <p>
+        This Working Group will take a phased approach to producing the individual deliverables as follows:
+      </p>
+      <ul>
+        <li><strong>Phase 1</strong>
+          <ul>
+            <li>SHACL 1.2 Core</li>
+            <li>SHACL 1.2 SPARQL Extensions</li>
+          </ul>
+        </li>
+        <li><strong>Phase 2</strong>
+          <ul>
+            <li>all other proposed deliverables</li>
+          </ul>
+        </li>
+      </ul>
+      <p>The reason for this phasing is to ensure that the core SHACL specification updates are in place before extension work takes place.</p>
+      <h3 id="timing">Timing</h3>
+      <p>
+        Timing of Phase 1 is dependent on the work of the <a href="https://www.w3.org/groups/wg/rdf-star/">RDF-star Working Group </a> (see <a href="#liaisons">Dependencies</a>, below). The time that this WG needs for the substantive work of Phase 1 is not expected to be great - single figure months - given work to date (see the <a href="#deliverables">Deliverables</a>).
+      </p>
+      <p>Phase 2 timing is unknown but is expected to take more than one year, even if the individual Deliverables are worked on in parallel, given the new material needed for some of them, in particular <strong> Inferencing Rules</strong> and <strong>Profiling</strong></p>
       <h3 id="out-of-scope">
         Out of Scope
       </h3>
-      <p class="remove">
-        {TBD: Identify topics known in advance to be out of scope}
-      </p>
+      <ul>
+        <li>Any work on non-SHACL documents/software</li>
+        <li>Online SHACL testing facilities
+          <ul>
+            <li>only implementation software that can be distributed/purchased and installed by users and run locally will be considered part of the test suite / implementation work of the WG</li>
+            <li>online facilities will be able to be listed as related to WG work</li>
+          </ul>
+        </li>
+      </ul>
       <h2 id="deliverables">
         Deliverables
       </h2>
       <h3 id="specifications">
         Specifications
       </h3>
-      <p class="remove">
-        <dl>
-          <dt class="spec">SHACL 1.2 Core</dt>
-          <dd>
-            <p>
-              This specification will basically be an updated and slightly extended version of the <a href="https://www.w3.org/TR/shacl/#part1">first part the SHACL 1.0 spec</a>.
-              It should fix some unfinished issues in SHACL 1.0, such as recursion.
-              A goal is maximum backwards compatibility.
-            </p>
-            <p>
-              For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-core">SHACL Core GitHub issues</a>.
-            </p>
-            <p>
-              There is an evolving <a href="../shacl-core/index.html">SHACL 1.2 Core draft</a>.
-            </p>
-          </dd>
-          <dt class="spec">SHACL 1.2 SPARQL Extensions</dt>
-          <dd>
-            <p>
-              This specification will be an incremental update of the <a href="https://www.w3.org/TR/shacl/#part2">second part the SHACL 1.0 spec</a>.
-              It would include selected SPARQL-related features from the <a href="https://w3c.github.io/shacl/shacl-af/">SHACL Advanced Features Report</a>.
-            </p>
-            <p>
-              For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-sparql">SHACL-SPARQL GitHub issues</a>.
-            </p>
-            <p>
-              There is an evolving <a href="../shacl-sparql/index.html">SHACL 1.2 SPARQL Extensions draft</a>.
-            </p>
-          </dd>
-          <dt class="spec">SHACL 1.2 User Interfaces</dt>
-          <dd>
-            <p>
-              This specification will define a richer vocabulary that can be queried by user interface tools to produce renderings of RDF graphs,
-              in particular for viewing and editing RDF resources on forms.
-              An example starting point is the <a href="https://datashapes.org/forms.html">DASH vocabulary</a>.
-            </p>
-          </dd>
-          <dt class="spec">SHACL 1.2 Inferencing Rules</dt>
-          <dd>
-            <p>
-              This specification will define a SHACL vocabulary to represent inferencing rules that can be used to infer new RDF statements from existing statements.
-              A starting point may be the <a href="https://w3c.github.io/shacl/shacl-af/#node-expressions">Node Expressions</a> and <a href="https://w3c.github.io/shacl/shacl-af/#rules">SHACL Rules</a>
-              from the Advanced Features document.
-            </p>
-          </dd>
-          <dt class="spec">SHACL 1.2 Compact Syntax</dt>
-          <dd>
-            <p>
-              This specification will define an alternative "compact" syntax that is custom-tailored for SHACL shapes.
-              A starting point is the <a href="https://w3c.github.io/shacl/shacl-compact-syntax/">SHACL Compact Syntax draft</a>.
-            </p>
-            <p>
-              For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/compact%20syntax">SHACL Compact Syntax GitHub issues</a>.
-            </p>
-            <p>
-              There is an evolving <a href="../shacl-compact-syntax/index.html">SHACL 1.2 Compact Syntax draft</a>.
-            </p>
-          </dd>
-        </dl>
-      </p>
+      <dl>
+        <dt class="spec">SHACL 1.2 Core</dt>
+        <dd>
+          <p>
+            This specification will basically be an updated and slightly extended version of the <a href="https://www.w3.org/TR/shacl/#part1">first part the SHACL 1.0 spec</a>.
+            It should fix some unfinished issues in SHACL 1.0, such as recursion.
+            A goal is maximum backwards compatibility.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-core">SHACL Core GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-core/index.html">SHACL 1.2 Core draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 SPARQL Extensions</dt>
+        <dd>
+          <p>
+            This specification will be an incremental update of the <a href="https://www.w3.org/TR/shacl/#part2">second part the SHACL 1.0 spec</a>.
+            It would include selected SPARQL-related features from the <a href="https://w3c.github.io/shacl/shacl-af/">SHACL Advanced Features Report</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-sparql">SHACL-SPARQL GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-sparql/index.html">SHACL 1.2 SPARQL Extensions draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 User Interfaces</dt>
+        <dd>
+          <p>
+            This specification will define a richer vocabulary that can be queried by user interface tools to produce renderings of RDF graphs,
+            in particular for viewing and editing RDF resources on forms.
+            An example starting point is the <a href="https://datashapes.org/forms.html">DASH vocabulary</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Inferencing Rules</dt>
+        <dd>
+          <p>
+            This specification will define a SHACL vocabulary to represent inferencing rules that can be used to infer new RDF statements from existing statements.
+            A starting point may be the <a href="https://w3c.github.io/shacl/shacl-af/#node-expressions">Node Expressions</a> and <a href="https://w3c.github.io/shacl/shacl-af/#rules">SHACL Rules</a>
+            from the Advanced Features document.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Profiling</dt>
+        <dd>
+          <p>
+            This specification will define methods for using SHACL to create formal profiles of (RDF) standards.
+          </p>
+          <p>
+            This work will likely build on the profile definitions of the W3C's <a href="https://www.w3.org/TR/dx-prof/">Profiles Vocabulary</a> which has been used extensively with SHACL constraints and the proposed <strong>SHACL 1.2 Inferencing Rules</strong>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/profiling">Profiling GitHub issues</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Compact Syntax</dt>
+        <dd>
+          <p>
+            This specification will define an alternative "compact" syntax that is custom-tailored for SHACL shapes.
+            A starting point is the <a href="https://w3c.github.io/shacl/shacl-compact-syntax/">SHACL Compact Syntax draft</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/compact%20syntax">SHACL Compact Syntax GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-compact-syntax/index.html">SHACL 1.2 Compact Syntax draft</a>.
+          </p>
+        </dd>
+      </dl>
       <h3 id="non-normative-reports">
         Non-Normative Reports
       </h3>
@@ -271,23 +302,36 @@
       <h3 id="test-suites">
         Test Suites and Other Software
       </h3>
-      <p class="remove">
-        {TBD: If there are no plans to create a test suite or other software,
-        please state that and remove the following paragraph. If Github is not
-        being used, then indicate where the license information is. If GitHub is
-        being used link to your LICENSE.md file in the next paragraph.}
+      <p>
+        The previous SHACL WG created the Test Suite as described in the <a href="https://w3c.github.io/data-shapes/data-shapes-test-suite/">SHACL Test Suite and Implementation Report</a>.
       </p>
       <p>
-        The group MAY produce test suites to support the Specifications. Please
-        see the GitHub LICENSE file for test suite contribution licensing
-        information.
+        This new WG will extend that Test Suite to cover new SHACL work and will work with as many implementers as possible to see new SHACL elements supported by tools. Members of the proposed new WG include contributors to the following implementations:
+      </p>
+      <ul>
+        <li><a href="https://github.com/TopQuadrant/shacl">TopBraid SHACL API</a></li>
+        <li><a href="https://github.com/RDFLib/pySHACL">pySHACL</a></li>
+        <li><a href="https://jena.apache.org/documentation/shacl/index.html">Apache Jena SHACL</a></li>
+      </ul>
+      <p>Possibly too:</p>
+      <ul>
+        <li><a href="https://github.com/dotnetrdf/dotnetrdf">dotNetRDF</a></li>
+        <li><a href="https://project.inria.fr/corese/">Corese</a></li>
+        <li><a href="https://github.com/weso/shaclex">shaclex</a></li>
+        <li><a href="https://graphdb.ontotext.com/documentation/10.7/shacl-validation.html">GraphDB</a></li>
+        <li><a href="https://rdf4j.org/documentation/programming/shacl/">RDF4J</a></li>
+      </ul>
+      <p>
+        All previously known implementers will be contacted and invited to extend their implementations.
       </p>
       <h2 id="liaisons">
         Dependencies or Liaisons
       </h2>
-      <p class="remove">
-        {TBD: List any significant dependencies on other groups (inside or
-        outside W3C) or materials. }
+      <p>
+        The initial work proposed for the WG is dependent on outputs from the <a href="https://www.w3.org/groups/wg/rdf-star/">RDF-star Working Group</a> for the proposed <strong>SHACL 1.2 Core</strong> and <strong>SHACL 1.2 SPARQL Extensions</strong> specifications since they intend to cater for RDF-Star. Liaison persons between this WG and the RDF-star WG have not yet been formalised.
+      </p>
+      <p>
+        No other dependencies are known.
       </p>
       <h2 id="process">
         Community and Business Group Process
@@ -322,27 +366,20 @@
         Contribution Mechanics
       </h2>
       <p>
-        Substantive Contributions to Specifications can only be made by Community
-        Group Participants who have agreed to the <a href=
-        "https://www.w3.org/community/about/process/cla/">W3C Community
-        Contributor License Agreement (CLA)</a>.
+        Substantive Contributions to Specifications can only be made by Working
+        Group Participants who abide by the <a href="https://www.w3.org/policies/process/#ParticipationCriteria">W3C Process</a> and follow the W3C <a href="https://www.w3.org/Consortium/cepc/">Code of Ethics and Professional Conduct</a>.
+      </p>
+      <p>
+        Contributions from non-WG members will need to be sponsored by a WG member.
+      </p>
+      <p>
+        WG contributors will use the existing <a href="https://github.com/w3c/shacl/">SHACL GitHub Repository</a> for all work. All contributions will need to be reviewed by WG members other than the contributor before being accepted.
       </p>
       <p>
         Specifications created in the Community Group must use the <a href=
         "http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">
         W3C Software and Document License</a>. All other documents produced by
         the group should use that License where possible.
-      </p>
-      <p class="remove">
-        {TBD: if CG doesn't use GitHub replace the remaining paragraphs in this
-        section with: "All Contributions are made on the groups public mail list
-        or public contrib list"}
-      </p>
-      <p>
-        Community Group participants agree to make all contributions in the
-        GitHub repo the group is using for the particular document. This may be
-        in the form of a pull request (preferred), by raising an issue, or by
-        adding a comment to an existing issue.
       </p>
       <p id="githublicense">
         All GitHub repositories attached to the Community Group must contain a
@@ -369,8 +406,8 @@
       <h2 id="decisions">
         Decision Process
       </h2>
-      <p class="remove">
-        If the decision policy is documented somewhere, update this section accordingly to link to it.
+      <p>
+        All scope and contributions decisions within this WG will be communicated within the <a href="https://github.com/w3c/shacl/">SHACL GitHub Repository</a>.
       </p>
       <p>
         This group will seek to make decisions where there is consensus. Groups
