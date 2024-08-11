@@ -28,9 +28,9 @@ Note that this should be done *after* these features have been supported by the 
 A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext) by [Allotrope](https://www.allotrope.org/):
 - [Shape Libraries](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ShaclDoc) (versioned). Packaging shapes into libraries enables modularized development of shapes. 
   It is used together with Import. 
-  A shape library is very similar to an OWL ontology and works technically in the same way. 
-  In fact we now use OWL ontology because of inference from `owl:import`, but there was quite some discussion, whether the assembly of shapes is an ontology in the OWL sense. 
-  For any large scale application of SHACL it is a must to modularize and it felt like a serious gap in the specification.
+  A shape library is very similar to an OWL ontology and technically works in the same way. 
+  In fact, we now use OWL ontologies because of inference from `owl:import`, but there was quite some discussion about whether the assembly of shapes is an ontology in the OWL sense. 
+  For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl)
 - Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
   The inclusion of SPARQL were a result that expressiveness of SHACL alone was not enough for the Allotrope use case. 
