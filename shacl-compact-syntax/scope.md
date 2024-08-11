@@ -64,7 +64,7 @@ There is also work that can be done to make the test suite more robust such as:
  - [SHACL conversion: malformed lists TopQuadrant/shacl#92](https://github.com/TopQuadrant/shacl/issues/92) (test case)
 
 ## Implementations
-Current SHACL-C implementations include the following.
+Current SHACL-C implementations include those listed below.
 
 Parsers/writers (i.e. convertors between SHACL and SHACL-C)
  - TopQuadrant had a SHACL-C implementation that is deprecated in favor of Jena's.
