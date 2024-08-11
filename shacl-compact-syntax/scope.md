@@ -41,10 +41,10 @@ A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-sourc
 - [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape), but unlike SHACL-AF rules that have `subject, property, object` or SPARQL, [these rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) `CONSTRUCT`, and have `IF` (being a shape to check) and `PRIORITY` parts
 - [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
-- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. you don't need to do `"""<sparql query>"""`.
-  Having a syntax for SPARQL allows a much better integration. 
-  We do not have a language within a language. 
-  XText (and other grammar based code generators) can be used to directly generate code from it and it is so much more powerful, if you have a single parser, that ensures consistency.
+- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e., you don't need to do `"""<sparql query>"""`.
+  - Having a syntax for SPARQL allows a much better integration.
+  - We do not have a language within a language.
+  - XText (and other grammar based code generators) can be used to directly generate code from it, and it is so much more powerful to have consistency ensured by a single parser.
 - [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (e.g., `><`, `⊻`, and/or `⩒`) in addition to keywords (e.g., `xone` and/or `xor`).
   This is a way to make SHACL-C even more compact, but many people cannot type them easily. The use of well-known operators can help make code more readable, and we expect that, like all models, they are far more often read then written, but where the boundary of obscurity ends is open to discussion.
 
