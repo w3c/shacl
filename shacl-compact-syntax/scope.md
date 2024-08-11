@@ -18,14 +18,26 @@ Note that this should be done *after* these features have been supported by the 
 
 ## New Features
 
-### Support for Additional SHACL-C Constructs
-- shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
+### Extra SHACL-C Syntax Features
+
+The following features will allow SHACL-C to capture more of SHACL, or express it in a nicer way:
+
+- Shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
 - [Support `xone` and more `or` cases](https://github.com/w3c/shacl/issues/12)
 - Opt out of the production of the triple `?baseUri rdf:type owl:Ontology`
 - Non-validating characteristics (e.g., generating `sh:order` triples by declaring `@order` at the top of a file/shape, allow grouping by `@group` at the top of a set of properties, and allowing a `@description` above properties).
-- Target shapes, see [rsx:targetShape](https://rdf4j.org/shacl/extensions.html)
+- [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (e.g., `><`, `⊻`, and/or `⩒`) in addition to keywords (e.g., `xone` and/or `xor`).
+  This is a way to make SHACL-C even more compact, but many people cannot type them easily. The use of well-known operators can help make code more readable, and we expect that, like all models, they are far more often read then written, but where the boundary of obscurity ends is open to discussion.
 
-A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext) by [Allotrope](https://www.allotrope.org/):
+### Extra SHACL Features
+
+The following features would extend SHACL, so are subject of discussion.
+The first one comes from RDF4J.
+The rest come from [SPARQL Inferencing Notation (SPIN)](https://spinrdf.org/) (the predecessor of SHACL)
+and/or the [Allotrope](https://www.allotrope.org/) Shapes Editor (see [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext)).
+Some or all of these additions may be ignored in favour of keeping SHACL-C a simple syntax to implement and use.
+
+- Target shapes, see [rsx:targetShape](https://rdf4j.org/shacl/extensions.html) (implemented in RDF4J ShaclSail)
 - [Shape Libraries](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ShaclDoc) (versioned). Packaging shapes into libraries enables modularized development of shapes. 
   It is used together with [Import](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl).
   A shape library is very similar to an OWL ontology and technically works in the same way. 
@@ -45,10 +57,6 @@ A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-sourc
   - Having a syntax for SPARQL allows a much better integration.
   - We do not have a language within a language.
   - XText (and other grammar based code generators) can be used to directly generate code from it, and it is so much more powerful to have consistency ensured by a single parser.
-- [Graphical Operators](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#OP_XONE) (e.g., `><`, `⊻`, and/or `⩒`) in addition to keywords (e.g., `xone` and/or `xor`).
-  This is a way to make SHACL-C even more compact, but many people cannot type them easily. The use of well-known operators can help make code more readable, and we expect that, like all models, they are far more often read then written, but where the boundary of obscurity ends is open to discussion.
-
-Some or all of these additions may be ignored in favour of keeping SHACL-C a simple syntax to implement and use.
 
 ### [Making SHACL-C Lossless](https://github.com/w3c/shacl/issues/36)
 
