@@ -33,10 +33,10 @@ A number of features from [SHACLC.xtext](https://gitlab.com/allotrope-open-sourc
   For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl)
 - Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
-  The inclusion of SPARQL were a result that expressiveness of SHACL alone was not enough for the Allotrope use case. 
-  We must for example ensure the unique presence of some nodes in an Allotrope file and use the SHACL SPARQL extension for it. 
-  If we support SPARQL, it feels natural to also apply it to select targets. 
-  Allotrope uses SPARQL sparingly because it is an extension only, so from the view of many of the Allotrope members, not "official" enough.
+  The inclusion of SPARQL resulted from implementation experience that expressiveness of SHACL alone was not enough for the Allotrope use case. 
+  For example, we need to ensure the unique presence of some nodes in an Allotrope file, and use the SHACL SPARQL extension for it. 
+  If we support SPARQL at all, it feels natural to also apply it to `SELECT` targets. 
+  Allotrope uses SPARQL sparingly because it is "only" a SHACL extension, so from the view of many of the Allotrope members, not "official" enough.
 - [Parameterized Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape)
 - [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape), but unlike SHACL-AF rules that have `subject, property, object` or SPARQL, [these rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) `CONSTRUCT`, and have `IF` (being a shape to check) and `PRIORITY` parts
 - [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions
