@@ -66,17 +66,17 @@ There is also work that can be done to make the test suite more robust such as:
 ## Implementations
 Current SHACL-C implementations include those listed below.
 
-Parsers/writers (i.e. convertors between SHACL and SHACL-C)
- - TopQuadrant had a SHACL-C implementation that is deprecated in favor of Jena's.
+**Parsers/writers** (i.e., convertors between SHACL and SHACL-C)
+ - TopQuadrant had a SHACL-C implementation that was deprecated in favor of Jena's.
    The the current SHACL-C specification [cites the grammar](https://w3c.github.io/shacl/shacl-compact-syntax/#grammar-section) of this implementation
  - [Jena](https://jena.apache.org/documentation/shacl/#shacl-compact-syntax): implemented in Java
  - [allotrope-open-source/shape-editor](https://gitlab.com/allotrope-open-source/shape-editor): implemented in Java for the Eclipse framework (uses XTEXT).
-   Introduces a number of number of new SHACL-C Constructs (see https://github.com/w3c/shacl/issues/52 ), reflected above
+   Introduces a number of number of new SHACL-C Constructs (see https://github.com/w3c/shacl/issues/52), reflected above.
  - [jeswr/shaclcjs](https://github.com/jeswr/shaclcjs) and [jeswr/shaclc-writer](https://github.com/jeswr/shaclc-writer): implemented in JavaScript
  - [edmondchuc/shaclc](https://github.com/edmondchuc/shaclc): implemented in Python, also has a [playground](https://edmondchuc.github.io/shaclc/)
 
-Editing helpers:
-- [jeswr/shaclc-language-server](https://github.com/jeswr/shaclc-language-server): Language Server, implements intellisense features for modern IDEs like VS-Code
+**Editing helpers**
+- [jeswr/shaclc-language-server](https://github.com/jeswr/shaclc-language-server): Language Server, implements IntelliSense-like features for modern IDEs like VS-Code
 - [VladimirAlexiev/shaclc-mode](https://github.com/VladimirAlexiev/shaclc-mode): for Emacs, implements syntax checking and highlighting, jumping from reference to definition
 
 
