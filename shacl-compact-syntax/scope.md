@@ -58,17 +58,12 @@ Some or all of these additions may be ignored in favour of keeping SHACL-C a sim
   For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl) (how is this different from `owl:imports`?)
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
-- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. unlike SHACL SPARQL, SPARQL is not embedded in RDF literals (`"""<sparql query>"""`) .
+- [Explicit Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. SPARQL is not embedded in RDF literals (`"""<sparql query>"""`), unlike SHACL SPARQL.
   - Potential benefits:
     - Having a syntax for SPARQL allows a much better integration.
     - We do not have a language within a language.
     - XText (and other grammar based code generators) can be used to directly generate code from it, and it is so much more powerful to have consistency ensured by a single parser.
-    - Using a more explicit SPARQL representation (not embedded in RDF literals) gives a better chance of implementing uncremental evaluation.
-  - Potential disadvantages:
-    - Copies large parts of the SPARQL grammar.
-    - To be compatible with SHACL, we need to devise a target RDF representation for this dedicated syntax.
-      There was [SPIN SPARQL Syntax](https://spinrdf.org/sp.html) (RDF triple constructs for expressing SPARQL queries), which SHACL abandoned because it was too wordy.
-    - Need to devise two algorithms: "SHACL parsing and compilation to triples" and "generation of SHACL from triples"
+  - Issue https://github.com/w3c/shacl/issues/75 discusses whether to reintroduce an explicit RDF syntax for SPARQL.
 
 ### [Making SHACL-C Lossless](https://github.com/w3c/shacl/issues/36)
 
