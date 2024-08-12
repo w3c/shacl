@@ -22,7 +22,13 @@ Note that this should be done *after* these features have been supported by the 
 
 The following features will allow SHACL-C to capture more of SHACL, or express it in a nicer way:
 
+- [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions, [part of SHACL Advanced](https://w3c.github.io/data-shapes/shacl-af/#functions)
 - Shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
+- [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape). 
+  - [These rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) `CONSTRUCT`, like SHACL Advanced [SPARQL Rules](https://w3c.github.io/data-shapes/shacl-af/#SPARQLRule) `sh:construct`
+    - Note: SHACL Advanced also has [Triple Rules](https://w3c.github.io/data-shapes/shacl-af/#TripleRule) (`subject, property, object`), and we need a syntax for that
+  - They have `IF` part being a shape to check, like [sh:condition](https://w3c.github.io/data-shapes/shacl-af/#condition)
+  - They have `PRIORITY` part, like [sh:order](https://w3c.github.io/data-shapes/shacl-af/#rules-order)
 - [Support `xone` and more `or` cases](https://github.com/w3c/shacl/issues/12)
 - Opt out of the production of the triple `?baseUri rdf:type owl:Ontology`
 - Non-validating characteristics (e.g., generating `sh:order` triples by declaring `@order` at the top of a file/shape, allow grouping by `@group` at the top of a set of properties, and allowing a `@description` above properties).
@@ -43,20 +49,25 @@ Some or all of these additions may be ignored in favour of keeping SHACL-C a sim
   A shape library is very similar to an OWL ontology and technically works in the same way. 
   In fact, we now use OWL ontologies because of inference from `owl:import`, but there was quite some discussion about whether the assembly of shapes is an ontology in the OWL sense. 
   For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
-- [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl)
+- [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl) (how is this different from `owl:imports`?)
 - Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
   The inclusion of SPARQL resulted from implementation experience that expressiveness of SHACL alone was not enough for the Allotrope use case. 
   For example, we need to ensure the unique presence of some nodes in an Allotrope file, and use the SHACL SPARQL extension for it. 
   If we support SPARQL at all, it feels natural to also apply it to `SELECT` targets. 
   Allotrope uses SPARQL sparingly because it is "only" a SHACL extension, so from the view of many of the Allotrope members, not "official" enough.
 - [Parameterized Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape)
-- [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape), but unlike SHACL-AF rules that have `subject, property, object` or SPARQL, [these rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) `CONSTRUCT`, and have `IF` (being a shape to check) and `PRIORITY` parts
-- [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
-- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e., you don't need to do `"""<sparql query>"""`.
-  - Having a syntax for SPARQL allows a much better integration.
-  - We do not have a language within a language.
-  - XText (and other grammar based code generators) can be used to directly generate code from it, and it is so much more powerful to have consistency ensured by a single parser.
+- [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. unlike SHACL SPARQL, SPARQL is not embedded in RDF literals (`"""<sparql query>"""`) .
+  - Potential benefits:
+    - Having a syntax for SPARQL allows a much better integration.
+    - We do not have a language within a language.
+    - XText (and other grammar based code generators) can be used to directly generate code from it, and it is so much more powerful to have consistency ensured by a single parser.
+    - Using a more explicit SPARQL representation (not embedded in RDF literals) gives a better chance of implementing uncremental evaluation.
+  - Potential disadvantages:
+    - Copies large parts of the SPARQL grammar.
+    - To be compatible with SHACL, we need to devise a target RDF representation for this dedicated syntax.
+      There was [SPIN SPARQL Syntax](https://spinrdf.org/sp.html) (RDF triple constructs for expressing SPARQL queries), which SHACL abandoned because it was too wordy.
+    - Need to devise two algorithms: "SHACL parsing and compilation to triples" and "generation of SHACL from triples"
 
 ### [Making SHACL-C Lossless](https://github.com/w3c/shacl/issues/36)
 
