@@ -22,13 +22,19 @@ Note that this should be done *after* these features have been supported by the 
 
 The following features will allow SHACL-C to capture more of SHACL, or express it in a nicer way:
 
-- [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions, [part of SHACL Advanced](https://w3c.github.io/data-shapes/shacl-af/#functions)
+- [SPARQL Functions](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#FunctionShape), inspired by SPIN Functions, like SHACL Advanced [functions](https://w3c.github.io/data-shapes/shacl-af/#functions)
 - Shorthand (`<`, `=`, `<=`, etc.) for property pair constraints
-- [Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape). 
+- [SPARQL Rules](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleShape). 
   - [These rules use](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#RuleBody) `CONSTRUCT`, like SHACL Advanced [SPARQL Rules](https://w3c.github.io/data-shapes/shacl-af/#SPARQLRule) `sh:construct`
     - Note: SHACL Advanced also has [Triple Rules](https://w3c.github.io/data-shapes/shacl-af/#TripleRule) (`subject, property, object`), and we need a syntax for that
   - They have `IF` part being a shape to check, like [sh:condition](https://w3c.github.io/data-shapes/shacl-af/#condition)
   - They have `PRIORITY` part, like [sh:order](https://w3c.github.io/data-shapes/shacl-af/#rules-order)
+- Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
+  The inclusion of SPARQL resulted from implementation experience that expressiveness of SHACL alone was not enough for the Allotrope use case. 
+  For example, we need to ensure the unique presence of some nodes in an Allotrope file, and use the SHACL SPARQL extension for it. 
+  If we support SPARQL at all, it feels natural to also apply it to `SELECT` targets. 
+  Allotrope uses SPARQL sparingly because it is "only" a SHACL extension, so from the view of many of the Allotrope members, not "official" enough.
+- [Parameterized SPARQL Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape) and [their invocation](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetCall), like SHACL Advanced [SPARQL Target Types](https://w3c.github.io/data-shapes/shacl-af/#SPARQLTargetType)
 - [Support `xone` and more `or` cases](https://github.com/w3c/shacl/issues/12)
 - Opt out of the production of the triple `?baseUri rdf:type owl:Ontology`
 - Non-validating characteristics (e.g., generating `sh:order` triples by declaring `@order` at the top of a file/shape, allow grouping by `@group` at the top of a set of properties, and allowing a `@description` above properties).
@@ -37,7 +43,8 @@ The following features will allow SHACL-C to capture more of SHACL, or express i
 
 ### Extra SHACL Features
 
-The following features would extend SHACL, so are subject of discussion.
+The following features would extend SHACL, so are subject of discussion (https://github.com/w3c/shacl/issues/74).
+
 The first one comes from RDF4J.
 The rest come from [SPARQL Inferencing Notation (SPIN)](https://spinrdf.org/) (the predecessor of SHACL)
 and/or the [Allotrope](https://www.allotrope.org/) Shapes Editor (see [SHACLC.xtext](https://gitlab.com/allotrope-open-source/shape-editor/-/blob/master/src/com.osthus.shapes.shaclc.parent/com.osthus.shapes.shaclc/src/com/osthus/shapes/shaclc/SHACLC.xtext)).
@@ -50,12 +57,6 @@ Some or all of these additions may be ignored in favour of keeping SHACL-C a sim
   In fact, we now use OWL ontologies because of inference from `owl:import`, but there was quite some discussion about whether the assembly of shapes is an ontology in the OWL sense. 
   For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl) (how is this different from `owl:imports`?)
-- Rich [Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#Target) including SPARQL targets.
-  The inclusion of SPARQL resulted from implementation experience that expressiveness of SHACL alone was not enough for the Allotrope use case. 
-  For example, we need to ensure the unique presence of some nodes in an Allotrope file, and use the SHACL SPARQL extension for it. 
-  If we support SPARQL at all, it feels natural to also apply it to `SELECT` targets. 
-  Allotrope uses SPARQL sparingly because it is "only" a SHACL extension, so from the view of many of the Allotrope members, not "official" enough.
-- [Parameterized Targets](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#TargetShape)
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
 - [Dedicated Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. unlike SHACL SPARQL, SPARQL is not embedded in RDF literals (`"""<sparql query>"""`) .
   - Potential benefits:
