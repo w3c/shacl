@@ -58,7 +58,7 @@ Some or all of these additions may be ignored in favour of keeping SHACL-C a sim
   For any large scale application of SHACL, it is necessary to modularize, and it felt like this was a serious gap in the specification.
 - [Imports](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ImportsDecl) (how is this different from `owl:imports`?)
 - Rich [Parameter Declarations](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#ParameterDeclaration) and respective assignments at invocation
-- [Explicit Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e. SPARQL is not embedded in RDF literals (`"""<sparql query>"""`), unlike SHACL SPARQL.
+- [Explicit Syntax](https://rawgit2.com/VladimirAlexiev/shacl/shaclc-grammars/shacl-compact-syntax/grammar/shaclc-XText.html#SparqlConstraint) for SPARQL Constraints, i.e., SPARQL is not embedded in RDF literals (`"""<sparql query>"""`), unlike SHACL SPARQL.
   - Potential benefits:
     - Having a syntax for SPARQL allows a much better integration.
     - We do not have a language within a language.
