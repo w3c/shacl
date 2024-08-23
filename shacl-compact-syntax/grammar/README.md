@@ -1,7 +1,7 @@
 # Unifying SHACL-C Grammars
 (Task: https://github.com/w3c/shacl/issues/37#issuecomment-1997655429 )
 
-As a first task of the SHACL Compact Syntax sub-WG, we look at proposed SHACL-C grammars:
+As a first task of the SHACL Compact Syntax Task Force, we look at proposed SHACL-C grammars:
 
 - [ANTLR](shaclc-ANTLR.g4) (was part of TopQuadrant SHACL, also in the [grammar-section](https://w3c.github.io/shacl/shacl-compact-syntax/#grammar-section) of the candidate spec) by @HolgerKnublauch
 - [JavaCC](https://github.com/apache/jena/blob/main/jena-shacl/shaclc/shaclc.jj) (part of Jena) by @afs
