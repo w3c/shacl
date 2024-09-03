@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SHACL WG Group Charter</title>
+    <link href="https://www.w3.org/2005/10/w3cdoc.css" media=screen rel=stylesheet type="text/css">
+    <link href="https://www.w3.org/OldGuide/pubrules-style.css" rel=stylesheet type="text/css">
+    <link href="https://www.w3.org/2006/02/charter-style.css" rel=stylesheet type="text/css">
+    <style>
+      main {
+        max-width: 60em;
+        margin: 0 auto;
+      }
+
+      ul#navbar {
+        font-size: small;
+      }
+
+      dt.spec {
+        font-weight: bold;
+      }
+
+      dt.spec new {
+        background: yellow;
+      }
+
+      ul.out-of-scope>li {
+        font-weight: bold;
+      }
+
+      ul.out-of-scope>li>ul>li {
+        font-weight: normal;
+      }
+
+      .issue {
+        background: cornsilk;
+        font-style: italic;
+      }
+
+      .todo {
+        color: #900;
+      }
+
+      footer {
+        font-size: small;
+      }
+
+      body {
+        max-width: 60em;
+        margin: auto;;
+      }
+      *:target {
+        background-color: yellow;
+      }
+      li {
+        margin-bottom: 9pt;
+      }
+      .note {
+        background-color: yellow;
+        padding: 10px;
+      }
+      .remove {
+        background-color: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <header id="header">
+      <aside>
+        <ul id="navbar">
+          <li><a href="#goals">Goals</a></li>
+          <li><a href="#scope-of-work">Scope</a></li>
+          <li><a href="#out-of-scope">Out of Scope</a></li>
+          <li><a href="#deliverables">Deliverables</a></li>
+          <li><a href="#specifications">&nbsp;&nbsp;Specifications</a></li>
+          <li><a href="#non-normative-reports">&nbsp;&nbsp;Non-Normative Reports</a></li>
+          <li><a href="#test-suites">&nbsp;&nbsp;Test Suites</a></li>
+          <li><a href="#liaisons">Liaisons</a></li>
+          <li><a href="#process">Processes</a></li>
+          <li><a href="#contrib">Contributing</a></li>
+          <li><a href="#transparency">Transparency</a></li>
+          <li><a href="#decisions">Decision Policy</a></li>
+          <li><a href="#chairs">Chairs</a></li>
+          <li><a href="#charter-change">Charter Change</a></li>
+        </ul>
+      </aside>
+      <p>
+        <a href="https://www.w3.org/"><img alt="W3C" height="48" src="https://www.w3.org/Icons/w3c_home" width="72"></a>
+      </p>
+    </header>
+    <main>
+      <h1>
+        [DRAFT] SHACL 1.2 Working Group Charter
+      </h1>
+      <p style="padding: 0.5ex; border: 1px solid green"> This proposed charter is available
+        on <a href="https://raw.githack.com/w3c/shacl/charter-1.2/shacl-wg.html">GitHub</a>.
+
+          Feel free to raise <a href="https://github.com/w3c/shacl/issues">issues</a>.
+      </p>
+      <div id="details">
+        <table class="summary-table">
+          <tr id="Status">
+            <th>
+              Charter Status
+            </th>
+            <td>
+              See the <span style="text-decoration:line-through;"><a href="https://www.w3.org/groups/wg/shacl/charters">group status page</a></span> and <a href="#history">detailed change history</a>.
+            </td>
+          </tr>
+          <tr id="Duration">
+            <th>
+              Start date
+            </th>
+            <td>
+              Approx September 2024
+            </td>
+          </tr>
+          <tr id="CharterEnd">
+            <th>
+              End date
+            </th>
+            <td>
+              Start + 2 years
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Chairs
+            </th>
+            <td>
+              Nicholas Car (KurrawongAI)<br />
+              Eliana Papoutsoglou (Taxonic)
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Team Contacts
+            </th>
+            <td>
+              <span><a href="mailto:xxx@w3.org">Xxx xxxxx</a></span> (0.50 <abbr
+                  title="Full-Time Equivalent">FTE</abbr>)
+            </td>
+          </tr>
+          <tr>
+            <th>
+              Meeting Schedule
+            </th>
+            <td>
+              <strong>Teleconferences:</strong> The Working Group and its Task Forces generally each hold
+                weekly teleconferences, but this may vary over time according to agenda and preferences.
+              <br>
+              <strong>Face-to-face:</strong> The Working Group generally meets during the W3C's annual Technical Plenary
+              week; additional face-to-face meetings may be scheduled by consent of the participants, usually no more than
+              2 per year.
+            </td>
+          </tr>
+        </table>
+      </div>
+      <h2 id="goals">
+        Goals
+      </h2>
+      <p>
+        This Working Group is formed to:
+      </p>
+      <ul>
+        <li>update SHACL in line with 1.2 version updates to RDF &amp; SPARQL, the core Semantic Web standards that SHACL is built on</li>
+        <li>extend the specification of advanced use of SHACL in line with use observed since 2017 & SHACL 1.0</li>
+        <li>develop new SHACL-based specifications in the areas of:
+          <ul style="margin-top:10px;">
+            <li>auto-generation of user interfaces to RDF graphs</li>
+            <li>reasoning rules - their dependencies, ordering and packaging</li>
+            <li>profiling mechanisms - how to specify constraints on specifications &amp; models</li>
+            <li>a "compact" syntax</li>
+          </ul>
+        </li>
+      </ul>
+      <h2 id="scope-of-work">
+        Scope of Work
+      </h2>
+      <p>
+        The scope of work for this WG is the delivery of the Specifications listed below in <a href="#deliverables">Deliverables</a> section only. This includes test suite extensions and implementations necessary for specification ratification.
+      </p>
+      <h3 id="phases">Phases</h3>
+      <p>
+        This Working Group will take a phased approach to producing the individual deliverables as follows:
+      </p>
+      <ul>
+        <li><strong>Phase 1</strong>
+          <ul>
+            <li>SHACL 1.2 Core</li>
+            <li>SHACL 1.2 SPARQL Extensions</li>
+          </ul>
+        </li>
+        <li><strong>Phase 2</strong>
+          <ul>
+            <li>all other proposed deliverables</li>
+          </ul>
+        </li>
+      </ul>
+      <p>The reason for this phasing is to ensure that the core SHACL specification updates are in place before extension work takes place.</p>
+      <h3 id="timing">Timing</h3>
+      <p>
+        Timing of Phase 1 is dependent on the work of the <a href="https://www.w3.org/groups/wg/rdf-star/">RDF-star Working Group </a> (see <a href="#liaisons">Dependencies</a>, below). The time that this WG needs for the substantive work of Phase 1 is not expected to be great - single figure months - given work to date (see the <a href="#deliverables">Deliverables</a>).
+      </p>
+      <p>Phase 2 timing is unknown but is expected to take more than one year, even if the individual Deliverables are worked on in parallel, given the new material needed for some of them, in particular <strong> Inferencing Rules</strong> and <strong>Profiling</strong></p>
+      <h3 id="out-of-scope">
+        Out of Scope
+      </h3>
+      <ul>
+        <li>Any work on non-SHACL documents/software</li>
+        <li>Online SHACL testing facilities
+          <ul>
+            <li>only implementation software that can be distributed/purchased and installed by users and run locally will be considered part of the test suite / implementation work of the WG</li>
+            <li>online facilities will be able to be listed as related to WG work</li>
+          </ul>
+        </li>
+      </ul>
+      <h2 id="deliverables">
+        Deliverables
+      </h2>
+      <h3 id="specifications">
+        Specifications
+      </h3>
+      <dl>
+        <dt class="spec">SHACL 1.2 Core</dt>
+        <dd>
+          <p>
+            This specification will basically be an updated and slightly extended version of the <a href="https://www.w3.org/TR/shacl/#part1">first part the SHACL 1.0 spec</a>.
+            It should fix some unfinished issues in SHACL 1.0, such as recursion.
+            A goal is maximum backwards compatibility.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-core">SHACL Core GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-core/index.html">SHACL 1.2 Core draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 SPARQL Extensions</dt>
+        <dd>
+          <p>
+            This specification will be an incremental update of the <a href="https://www.w3.org/TR/shacl/#part2">second part the SHACL 1.0 spec</a>.
+            It would include selected SPARQL-related features from the <a href="https://w3c.github.io/shacl/shacl-af/">SHACL Advanced Features Report</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/issues?q=is%3Aopen+is%3Aissue+label%3Ashacl-sparql">SHACL-SPARQL GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-sparql/index.html">SHACL 1.2 SPARQL Extensions draft</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 User Interfaces</dt>
+        <dd>
+          <p>
+            This specification will define a richer vocabulary that can be queried by user interface tools to produce renderings of RDF graphs,
+            in particular for viewing and editing RDF resources on forms.
+            An example starting point is the <a href="https://datashapes.org/forms.html">DASH vocabulary</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Inferencing Rules</dt>
+        <dd>
+          <p>
+            This specification will define a SHACL vocabulary to represent inferencing rules that can be used to infer new RDF statements from existing statements.
+            A starting point may be the <a href="https://w3c.github.io/shacl/shacl-af/#node-expressions">Node Expressions</a> and <a href="https://w3c.github.io/shacl/shacl-af/#rules">SHACL Rules</a>
+            from the Advanced Features document.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Profiling</dt>
+        <dd>
+          <p>
+            This specification will define methods for using SHACL to create formal profiles of (RDF) standards.
+          </p>
+          <p>
+            This work will likely build on the profile definitions of the W3C's <a href="https://www.w3.org/TR/dx-prof/">Profiles Vocabulary</a> which has been used extensively with SHACL constraints and the proposed <strong>SHACL 1.2 Inferencing Rules</strong>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/profiling">Profiling GitHub issues</a>.
+          </p>
+        </dd>
+        <dt class="spec">SHACL 1.2 Compact Syntax</dt>
+        <dd>
+          <p>
+            This specification will define an alternative "compact" syntax that is custom-tailored for SHACL shapes.
+            A starting point is the <a href="https://w3c.github.io/shacl/shacl-compact-syntax/">SHACL Compact Syntax draft</a>.
+          </p>
+          <p>
+            For specific suggested issues see <a href="https://github.com/w3c/shacl/labels/compact%20syntax">SHACL Compact Syntax GitHub issues</a>.
+          </p>
+          <p>
+            There is an evolving <a href="../shacl-compact-syntax/index.html">SHACL 1.2 Compact Syntax draft</a>.
+          </p>
+        </dd>
+      </dl>
+      <h3 id="non-normative-reports">
+        Non-Normative Reports
+      </h3>
+      <p>
+        The group may produce other Community Group Reports within the scope of
+        this charter but that are not Specifications, for instance use cases,
+        requirements, or white papers.
+      </p>
+      <h3 id="test-suites">
+        Test Suites and Other Software
+      </h3>
+      <p>
+        The previous SHACL WG created the Test Suite as described in the <a href="https://w3c.github.io/data-shapes/data-shapes-test-suite/">SHACL Test Suite and Implementation Report</a>.
+      </p>
+      <p>
+        This new WG will extend that Test Suite to cover new SHACL work and will work with as many implementers as possible to see new SHACL elements supported by tools. Members of the proposed new WG include contributors to the following implementations:
+      </p>
+      <ul>
+        <li><a href="https://github.com/TopQuadrant/shacl">TopBraid SHACL API</a></li>
+        <li><a href="https://github.com/RDFLib/pySHACL">pySHACL</a></li>
+        <li><a href="https://jena.apache.org/documentation/shacl/index.html">Apache Jena SHACL</a></li>
+      </ul>
+      <p>Possibly too:</p>
+      <ul>
+        <li><a href="https://github.com/dotnetrdf/dotnetrdf">dotNetRDF</a></li>
+        <li><a href="https://project.inria.fr/corese/">Corese</a></li>
+        <li><a href="https://github.com/weso/shaclex">shaclex</a></li>
+        <li><a href="https://graphdb.ontotext.com/documentation/10.7/shacl-validation.html">GraphDB</a></li>
+        <li><a href="https://rdf4j.org/documentation/programming/shacl/">RDF4J</a></li>
+      </ul>
+      <p>
+        All previously known implementers will be contacted and invited to extend their implementations.
+      </p>
+      <h2 id="liaisons">
+        Dependencies or Liaisons
+      </h2>
+      <p>
+        The initial work proposed for the WG is dependent on outputs from the <a href="https://www.w3.org/groups/wg/rdf-star/">RDF-star Working Group</a> for the proposed <strong>SHACL 1.2 Core</strong> and <strong>SHACL 1.2 SPARQL Extensions</strong> specifications since they intend to cater for RDF-Star. Liaison persons between this WG and the RDF-star WG have not yet been formalised.
+      </p>
+      <p>
+        No other dependencies are known.
+      </p>
+      <h2 id="process">
+        Community and Business Group Process
+      </h2>
+      <p>
+        The group operates under the <a href=
+        "https://www.w3.org/community/about/process/">Community and Business
+        Group Process</a>. Terms in this Charter that conflict with those of the
+        Community and Business Group Process are void.
+      </p>
+      <p>
+        As with other Community Groups, W3C seeks organizational licensing
+        commitments under the <a href=
+        'https://www.w3.org/community/about/process/cla/'>W3C Community
+        Contributor License Agreement (CLA)</a>. When people request to
+        participate without representing their organization's legal interests,
+        W3C will in general approve those requests for this group with the
+        following understanding: W3C will seek and expect an organizational
+        commitment under the CLA starting with the individual's first request to
+        make a contribution to a group <a href="#deliverables">Deliverable</a>.
+        The section on <a href="#contrib">Contribution Mechanics</a> describes
+        how W3C expects to monitor these contribution requests.
+      </p>
+
+      <p>
+        The <a href="https://www.w3.org/Consortium/cepc/">W3C Code of
+        Ethics and Professional Conduct</a> applies to participation in
+        this group.
+      </p>
+
+      <h2 id="contrib">
+        Contribution Mechanics
+      </h2>
+      <p>
+        Substantive Contributions to Specifications can only be made by Working
+        Group Participants who abide by the <a href="https://www.w3.org/policies/process/#ParticipationCriteria">W3C Process</a> and follow the W3C <a href="https://www.w3.org/Consortium/cepc/">Code of Ethics and Professional Conduct</a>.
+      </p>
+      <p>
+        Contributions from non-WG members will need to be sponsored by a WG member.
+      </p>
+      <p>
+        WG contributors will use the existing <a href="https://github.com/w3c/shacl/">SHACL GitHub Repository</a> for all work. All contributions will need to be reviewed by WG members other than the contributor before being accepted.
+      </p>
+      <p>
+        Specifications created in the Community Group must use the <a href=
+        "http://www.w3.org/Consortium/Legal/2015/copyright-software-and-document">
+        W3C Software and Document License</a>. All other documents produced by
+        the group should use that License where possible.
+      </p>
+      <p id="githublicense">
+        All GitHub repositories attached to the Community Group must contain a
+        copy of the <a href=
+        "https://github.com/w3c/licenses/blob/master/CG-CONTRIBUTING.md">CONTRIBUTING</a>
+        and <a href=
+        "https://github.com/w3c/licenses/blob/master/CG-LICENSE.md">LICENSE</a>
+        files.
+      </p>
+      <h2 id="transparency">
+        Transparency
+      </h2>
+      <p>
+        The group will conduct all of its technical work in public. If the group
+        uses GitHub, all technical work will occur in its GitHub repositories
+        (and not in mailing list discussions). This is to ensure contributions
+        can be tracked through a software tool.
+      </p>
+      <p>
+        Meetings may be restricted to Community Group participants, but a public
+        summary or minutes must be posted to the group's public mailing list, or
+        to a GitHub issue if the group uses GitHub.
+      </p>
+      <h2 id="decisions">
+        Decision Process
+      </h2>
+      <p>
+        All scope and contributions decisions within this WG will be communicated within the <a href="https://github.com/w3c/shacl/">SHACL GitHub Repository</a>.
+      </p>
+      <p>
+        This group will seek to make decisions where there is consensus. Groups
+        are free to decide how to make decisions (e.g. Participants who have
+        earned Committer status for a history of useful contributions assess
+        consensus, or the Chair assesses consensus, or where consensus isn't
+        clear there is a Call for Consensus [CfC] to allow multi-day online
+        feedback for a proposed course of action). It is expected that
+        participants can earn Committer status through a history of valuable
+        contributions as is common in open source projects. After discussion and
+        due consideration of different opinions, a decision should be publicly
+        recorded (where GitHub is used as the resolution of an Issue).
+      </p>
+      <p>
+        If substantial disagreement remains (e.g. the group is divided) and the
+        group needs to decide an Issue in order to continue to make progress, the
+        Committers will choose an alternative that had substantial support (with
+        a vote of Committers if necessary). Individuals who disagree with the
+        choice are strongly encouraged to take ownership of their objection by
+        taking ownership of an alternative fork. This is explicitly allowed (and
+        preferred to blocking progress) with a goal of letting implementation
+        experience inform which spec is ultimately chosen by the group to move
+        ahead with.
+      </p>
+      <p>
+        Any decisions reached at any meeting are tentative and should be recorded
+        in a GitHub Issue for groups that use GitHub and otherwise on the group's
+        public mail list. Any group participant may object to a decision reached
+        at an online or in-person meeting within 7 days of publication of the
+        decision provided that they include clear technical reasons for their
+        objection. The Chairs will facilitate discussion to try to resolve the
+        objection according to this decision process.
+      </p>
+      <p>
+        It is the Chairs' responsibility to ensure that the decision process is
+        fair, respects the consensus of the CG, and does not unreasonably favour
+        or discriminate against any group participant or their employer.
+      </p>
+      <h2 id="chairs">
+        Chair Selection
+      </h2>
+      <p>
+        Participants in this group choose their Chair(s) and can replace their
+        Chair(s) at any time using whatever means they prefer. However, if 5
+        participants, no two from the same organisation, call for an election,
+        the group must use the following process to replace any current Chair(s)
+        with a new Chair, consulting the Community Development Lead on election
+        operations (e.g., voting infrastructure and using <a href=
+        "https://tools.ietf.org/html/rfc2777">RFC 2777</a>).
+      </p>
+      <ol>
+        <li>Participants announce their candidacies. Participants have 14 days to
+        announce their candidacies, but this period ends as soon as all
+        participants have announced their intentions. If there is only one
+        candidate, that person becomes the Chair. If there are two or more
+        candidates, there is a vote. Otherwise, nothing changes.
+        </li>
+        <li>Participants vote. Participants have 21 days to vote for a single
+        candidate, but this period ends as soon as all participants have voted.
+        The individual who receives the most votes, no two from the same
+        organisation, is elected chair. In case of a tie, RFC2777 is used to
+        break the tie. An elected Chair may appoint co-Chairs.
+        </li>
+      </ol>
+      <p>
+        Participants dissatisfied with the outcome of an election may ask the
+        Community Development Lead to intervene. The Community Development Lead,
+        after evaluating the election, may take any action including no action.
+      </p>
+      <h2 id="charter-change">
+        Amendments to this Charter
+      </h2>
+      <p>
+        The group can decide to work on a proposed amended charter, editing the
+        text using the <a href="#decision">Decision Process</a> described above.
+        The decision on whether to adopt the amended charter is made by
+        conducting a 30-day vote on the proposed new charter. The new charter, if
+        approved, takes effect on either the proposed date in the charter itself,
+        or 7 days after the result of the election is announced, whichever is
+        later. A new charter must receive 2/3 of the votes cast in the approval
+        vote to pass. The group may make simple corrections to the charter such
+        as deliverable dates by the simpler group decision process rather than
+        this charter amendment process. The group will use the amendment process
+        for any substantive changes to the goals, scope, deliverables, decision
+        process or rules for amending the charter.
+      </p>
+    </main>
+    <hr>
+    <footer>
+      <address>
+        <a href="mailto:xxx@w3.org">Xxx Xxxxx</a>
+      </address>
+
+      <p class="copyright">Copyright © 2024 <a href="https://www.w3.org/">World Wide Web
+          Consortium</a>.<br>
+        <abbr title="World Wide Web Consortium">W3C</abbr><sup>®</sup>
+        <a href="https://www.w3.org/Consortium/Legal/ipr-notice#Legal_Disclaimer">liability</a>,
+        <a href="https://www.w3.org/Consortium/Legal/ipr-notice#W3C_Trademarks">trademark</a> and
+        <a rel="license" href="https://www.w3.org/Consortium/Legal/2015/copyright-software-and-document"
+          title="W3C Software and Document Notice and License">permissive document license</a> rules apply.
+      </p>
+      <hr>
+      <p><a href="https://github.com/w3c/shacl/charter-1.2">Yes, it's on GitHub!</a>.</p>
+    </footer>
+  </body>
+</html>
