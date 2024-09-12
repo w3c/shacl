@@ -1,0 +1,116 @@
+/* converted on Thu Apr 25, 2024, 16:28 (UTC) by jison-to-w3c v0.67 which is Copyright (c) 2011-2024 by Gunther Rademacher <grd@gmx.net> */
+
+shaclDoc ::= directive* (nodeShape | shapeClass)* ttlStatement* EOF
+directive
+         ::= baseDecl
+           | importsDecl
+           | prefixDecl
+baseDecl ::= KW_BASE IRIREF
+importsDecl
+         ::= KW_IMPORTS IRIREF
+prefixDecl
+         ::= KW_PREFIX PNAME_NS IRIREF
+nodeShapeIri
+         ::= iri
+nodeShape
+         ::= KW_SHAPE nodeShapeIri targetClass? turtleAnnotation? nodeShapeBody
+shapeClass
+         ::= KW_SHAPE_CLASS nodeShapeIri turtleAnnotation? nodeShapeBody
+turtleAnnotation
+         ::= ';' turtleAnnotation2
+turtleAnnotation2
+         ::= predicate turtleAnnotation?
+predicate
+         ::= iri objectList
+objectList
+         ::= object objectTail*
+object   ::= iriOrLiteral
+           | blankNodeSection
+           | list
+list     ::= '(' object* ')'
+objectTail
+         ::= ',' object
+blankNodeSection
+         ::= '[' turtleAnnotation2 ']'
+pcSection
+         ::= '%' turtleAnnotation2 '%'
+iriHead  ::= iri
+ttlStatement
+         ::= iriHead turtleAnnotation2 '.'
+
+nodeShapeBody
+         ::= '{' constraint* '}'
+targetClass
+         ::= '->' iri+
+
+constraint
+         ::= (nodeOrEmit+ | path ( propertyCount | propertyNot propertyOrComponent* )*) pcSection? '.'
+orNotComponent
+         ::= '|' nodeNot
+nodeOrEmit
+         ::= nodeOr
+nodeOr   ::= nodeNot orNotComponent*
+nodeNot  ::= '!'? nodeValue
+targetOrParam
+         ::= TARGET
+           | PARAM
+nodeValue
+         ::= targetOrParam '=' iriOrLiteralOrArray
+propertyOrComponent
+         ::= '|' propertyNot
+propertyNot
+         ::= '!'? propertyAtom
+propertyAtom
+         ::= iri
+           | NODEKIND
+           | shapeRef
+           | PARAM '=' iriOrLiteralOrArray
+           | nodeShapeBody
+propertyCount
+         ::= '[' propertyMinCount '..' propertyMaxCount ']'
+propertyMinCount
+         ::= INTEGER
+propertyMaxCount
+         ::= INTEGER
+           | '*'
+shapeRef ::= ATPNAME_LN
+           | ATPNAME_NS
+           | '@' IRIREF
+path     ::= pathAlternative
+additionalAlternative
+         ::= '|' pathSequence
+pathAlternative
+         ::= pathSequence additionalAlternative*
+additionalSequence
+         ::= '/' pathEltOrInverse
+pathSequence
+         ::= pathEltOrInverse additionalSequence*
+pathElt  ::= pathPrimary pathMod?
+pathEltOrInverse
+         ::= '^'? pathElt
+pathMod  ::= '?'
+           | '*'
+           | '+'
+pathPrimary
+         ::= iri
+           | '(' pathAlternative ')'
+iriOrLiteralOrArray
+         ::= iriOrLiteral
+           | '[' iriOrLiteral* ']'
+iriOrLiteral
+         ::= iri
+           | literal
+iri      ::= IRIREF
+           | PNAME_LN
+           | PNAME_NS
+           | 'a'
+literal  ::= string ( LANGTAG | '^^' iri )?
+           | INTEGER
+           | DECIMAL
+           | DOUBLE
+           | KW_TRUE
+           | KW_FALSE
+string   ::= STRING_LITERAL1
+           | STRING_LITERAL2
+           | STRING_LITERAL_LONG1
+           | STRING_LITERAL_LONG2
