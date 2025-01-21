@@ -2,4 +2,5 @@
 , "contacts":  ["caribouW3"]
 , "policy":    "open"
 , "repo-type": "archive"
+  "exposed": "false"
 }
