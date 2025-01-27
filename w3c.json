@@ -1,6 +1,6 @@
 {    
-, "contacts":  ["caribouW3"]
+  "contacts":  ["caribouW3"]
 , "policy":    "open"
 , "repo-type": "archive"
-  "exposed": "false"
+, "exposed": "false"
 }
